@@ -1,0 +1,159 @@
+##fileformat=VCFv4.2
+##ALT=<ID=NON_REF,Description="Represents any possible alternative allele at this location">
+##FILTER=<ID=DP,Description="DP < 8.0">
+##FILTER=<ID=FS,Description="FS > 40.0">
+##FILTER=<ID=LowQual,Description="Low quality">
+##FILTER=<ID=MQ,Description="MQ < 30.0">
+##FILTER=<ID=MQRankSum,Description="MQRankSum < -12.5">
+##FILTER=<ID=QD,Description="QD < 2.0">
+##FILTER=<ID=ReadPosRankSum,Description="ReadPosRankSum < -8.0">
+##FORMAT=<ID=AB,Number=1,Type=Float,Description="Allele balance for each het genotype">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads with MQ=255 or with bad mates are filtered)">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=MIN_DP,Number=1,Type=Integer,Description="Minimum DP observed within the GVCF block">
+##FORMAT=<ID=PGT,Number=1,Type=String,Description="Physical phasing haplotype information, describing how the alternate alleles are phased in relation to one another">
+##FORMAT=<ID=PID,Number=1,Type=String,Description="Physical phasing ID information, where each unique ID within a given sample (but not across samples) connects records within a phasing group">
+##FORMAT=<ID=PL,Number=G,Type=Integer,Description="Normalized, Phred-scaled likelihoods for genotypes as defined in the VCF specification">
+##FORMAT=<ID=RGQ,Number=1,Type=Integer,Description="Unconditional reference genotype confidence, encoded as a phred quality -10*log10 p(genotype call is wrong)">
+##FORMAT=<ID=SB,Number=4,Type=Integer,Description="Per-sample component statistics which comprise the Fisher's Exact Test to detect strand bias.">
+##INFO=<ID=ABHet,Number=1,Type=Float,Description="Allele Balance for heterozygous calls (ref/(ref+alt))">
+##INFO=<ID=ABHom,Number=1,Type=Float,Description="Allele Balance for homozygous calls (A/(A+O)) where A is the allele (ref or alt) and O is anything other">
+##INFO=<ID=AC,Number=A,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency, for each ALT allele, in the same order as listed">
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
+##INFO=<ID=BaseQRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt Vs. Ref base qualities">
+##INFO=<ID=ClippingRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref number of hard clipped bases">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP Membership">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth; some reads may have been filtered">
+##INFO=<ID=DS,Number=0,Type=Flag,Description="Were any of the samples downsampled?">
+##INFO=<ID=END,Number=1,Type=Integer,Description="Stop position of the interval">
+##INFO=<ID=ExcessHet,Number=1,Type=Float,Description="Phred-scaled p-value for exact test of excess heterozygosity">
+##INFO=<ID=FS,Number=1,Type=Float,Description="Phred-scaled p-value using Fisher's exact test to detect strand bias">
+##INFO=<ID=GC,Number=1,Type=Float,Description="GC content around the variant (see docs for window size details)">
+##INFO=<ID=HaplotypeScore,Number=1,Type=Float,Description="Consistency of the site with at most two segregating haplotypes">
+##INFO=<ID=InbreedingCoeff,Number=1,Type=Float,Description="Inbreeding coefficient as estimated from the genotype likelihoods per-sample when compared against the Hardy-Weinberg expectation">
+##INFO=<ID=MLEAC,Number=A,Type=Integer,Description="Maximum likelihood expectation (MLE) for the allele counts (not necessarily the same as the AC), for each ALT allele, in the same order as listed">
+##INFO=<ID=MLEAF,Number=A,Type=Float,Description="Maximum likelihood expectation (MLE) for the allele frequency (not necessarily the same as the AF), for each ALT allele, in the same order as listed">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=MQRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities">
+##INFO=<ID=OND,Number=1,Type=Float,Description="Overall non-diploid ratio (alleles/(alleles+non-alleles))">
+##INFO=<ID=QD,Number=1,Type=Float,Description="Variant Confidence/Quality by Depth">
+##INFO=<ID=RAW_MQ,Number=1,Type=Float,Description="Raw data for RMS Mapping Quality">
+##INFO=<ID=ReadPosRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias">
+##INFO=<ID=SOR,Number=1,Type=Float,Description="Symmetric Odds Ratio of 2x2 contingency table to detect strand bias">
+##INFO=<ID=VariantType,Number=1,Type=String,Description="Variant type description">
+##INFO=<ID=VP,Number=1,Type=String,Description="Variation Property.  Documentation is at ftp://ftp.ncbi.nlm.nih.gov/snp/specs/dbSNP_BitField_latest.pdf">
+##INFO=<ID=NOC,Number=0,Type=Flag,Description="Contig allele not present in variant allele list. The reference sequence allele at the mapped position is not present in the variant allele list, adjusted for orientation.">
+##INFO=<ID=VLD,Number=0,Type=Flag,Description="Is Validated.  This bit is set if the variant has 2+ minor allele count based on frequency or genotype data.">
+##INFO=<ID=NOV,Number=0,Type=Flag,Description="Rs cluster has non-overlapping allele sets. True when rs set has more than 2 alleles from different submissions and these sets share no alleles in common.">
+##INFO=<ID=G5A,Number=0,Type=Flag,Description=">5% minor allele frequency in each and all populations">
+##INFO=<ID=SYN,Number=0,Type=Flag,Description="Has synonymous A coding region variation where one allele in the set does not change the encoded amino acid. FxnCode = 3">
+##INFO=<ID=VC,Number=1,Type=String,Description="Variation Class">
+##INFO=<ID=CFL,Number=0,Type=Flag,Description="Has Assembly conflict. This is for weight 1 and 2 variant that maps to different chromosomes on different assemblies.">
+##INFO=<ID=COMMON,Number=1,Type=Integer,Description="RS is a common SNP.  A common SNP is one that has at least one 1000Genomes population with a minor allele of frequency >= 1% and for which 2 or more founders contribute to that minor allele frequency.">
+##INFO=<ID=GNO,Number=0,Type=Flag,Description="Genotypes available. The variant has individual genotype (in SubInd table).">
+##INFO=<ID=DSS,Number=0,Type=Flag,Description="In donor splice-site FxnCode = 75">
+##INFO=<ID=U5,Number=0,Type=Flag,Description="In 5' UTR Location is in an untranslated region (UTR). FxnCode = 55">
+##INFO=<ID=OTH,Number=0,Type=Flag,Description="Has other variant with exactly the same set of mapped positions on NCBI refernce assembly.">
+##INFO=<ID=ASP,Number=0,Type=Flag,Description="Is Assembly specific. This is set if the variant only maps to one assembly">
+##INFO=<ID=OM,Number=0,Type=Flag,Description="Has OMIM/OMIA">
+##INFO=<ID=SAO,Number=1,Type=Integer,Description="Variant Allele Origin: 0 - unspecified, 1 - Germline, 2 - Somatic, 3 - Both">
+##INFO=<ID=MUT,Number=0,Type=Flag,Description="Is mutation (journal citation, explicit fact): a low frequency variation that is cited in journal and other reputable sources">
+##INFO=<ID=G5,Number=0,Type=Flag,Description=">5% minor allele frequency in 1+ populations">
+##INFO=<ID=INT,Number=0,Type=Flag,Description="In Intron FxnCode = 6">
+##INFO=<ID=CDA,Number=0,Type=Flag,Description="Variation is interrogated in a clinical diagnostic assay">
+##INFO=<ID=KGPhase1,Number=0,Type=Flag,Description="1000 Genome phase 1 (incl. June Interim phase 1)">
+##INFO=<ID=KGPhase3,Number=0,Type=Flag,Description="1000 Genome phase 3">
+##INFO=<ID=HD,Number=0,Type=Flag,Description="Marker is on high density genotyping kit (50K density or greater).  The variant may have phenotype associations present in dbGaP.">
+##INFO=<ID=dbSNPBuildID,Number=1,Type=Integer,Description="First dbSNP Build for RS">
+##INFO=<ID=PM,Number=0,Type=Flag,Description="Variant is Precious(Clinical,Pubmed Cited)">
+##INFO=<ID=ASS,Number=0,Type=Flag,Description="In acceptor splice site FxnCode = 73">
+##INFO=<ID=MTP,Number=0,Type=Flag,Description="Microattribution/third-party annotation(TPA:GWAS,PAGE)">
+##INFO=<ID=SSR,Number=1,Type=Integer,Description="Variant Suspect Reason Codes (may be more than one value added together) 0 - unspecified, 1 - Paralog, 2 - byEST, 4 - oldAlign, 8 - Para_EST, 16 - 1kg_failed, 1024 - other">
+##INFO=<ID=CAF,Number=.,Type=String,Description="An ordered, comma delimited list of allele frequencies based on 1000Genomes, starting with the reference allele followed by alternate alleles as ordered in the ALT column. Where a 1000Genomes alternate allele is not in the dbSNPs alternate allele set, the allele is added to the ALT column.  The minor allele is the second largest value in the list, and was previuosly reported in VCF as the GMAF.  This is the GMAF reported on the RefSNP and EntrezSNP pages and VariationReporter">
+##INFO=<ID=S3D,Number=0,Type=Flag,Description="Has 3D structure - SNP3D table">
+##INFO=<ID=TPA,Number=0,Type=Flag,Description="Provisional Third Party Annotation(TPA) (currently rs from PHARMGKB who will give phenotype data)">
+##INFO=<ID=SLO,Number=0,Type=Flag,Description="Has SubmitterLinkOut - From SNP->SubSNP->Batch.link_out">
+##INFO=<ID=R5,Number=0,Type=Flag,Description="In 5' gene region FxnCode = 15">
+##INFO=<ID=NSN,Number=0,Type=Flag,Description="Has non-synonymous nonsense A coding region variation where one allele in the set changes to STOP codon (TER). FxnClass = 41">
+##INFO=<ID=R3,Number=0,Type=Flag,Description="In 3' gene region FxnCode = 13">
+##INFO=<ID=NSM,Number=0,Type=Flag,Description="Has non-synonymous missense A coding region variation where one allele in the set changes protein peptide. FxnClass = 42">
+##INFO=<ID=NSF,Number=0,Type=Flag,Description="Has non-synonymous frameshift A coding region variation where one allele in the set changes all downstream amino acids. FxnClass = 44">
+##INFO=<ID=WTD,Number=0,Type=Flag,Description="Is Withdrawn by submitter If one member ss is withdrawn by submitter, then this bit is set.  If all member ss' are withdrawn, then the rs is deleted to SNPHistory">
+##INFO=<ID=LSD,Number=0,Type=Flag,Description="Submitted from a locus-specific database">
+##INFO=<ID=PMC,Number=0,Type=Flag,Description="Links exist to PubMed Central article">
+##INFO=<ID=U3,Number=0,Type=Flag,Description="In 3' UTR Location is in an untranslated region (UTR). FxnCode = 53">
+##INFO=<ID=REF,Number=0,Type=Flag,Description="Has reference A coding region variation where one allele in the set is identical to the reference sequence. FxnCode = 8">
+##INFO=<ID=RSPOS,Number=1,Type=Integer,Description="Chr position reported in dbSNP">
+##INFO=<ID=RS,Number=1,Type=Integer,Description="dbSNP ID (i.e. rs number)">
+##INFO=<ID=RV,Number=0,Type=Flag,Description="RS orientation is reversed">
+##INFO=<ID=WGT,Number=1,Type=Integer,Description="Weight, 00 - unmapped, 1 - weight 1, 2 - weight 2, 3 - weight 3 or more">
+##INFO=<ID=GENEINFO,Number=1,Type=String,Description="Pairs each of gene symbol:gene id.  The gene symbol and id are delimited by a colon (:) and each pair is delimited by a vertical bar (|)">
+##SnpSiftCmd="SnpSift dbnsfp /data/tiger/harald/SCD/SCD-002/VCF/SCD-002_FILTERED_SNV.temp1.vcf"
+##INFO=<ID=dbNSFP_ExAC_NFE_AC,Number=A,Type=Integer,Description="Field 'ExAC_NFE_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_GERP___RS,Number=A,Type=Float,Description="Field 'GERP++_RS' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_EAS_AC,Number=A,Type=Integer,Description="Field '1000Gp3_EAS_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_CADD_phred,Number=A,Type=Float,Description="Field 'CADD_phred' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_SAS_AF,Number=A,Type=Float,Description="Field '1000Gp3_SAS_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_SAS_AC,Number=A,Type=Integer,Description="Field '1000Gp3_SAS_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AC,Number=A,Type=Integer,Description="Field 'ExAC_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_MutationTaster_pred,Number=A,Type=Character,Description="Field 'MutationTaster_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AMR_AF,Number=A,Type=Float,Description="Field '1000Gp3_AMR_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AF,Number=A,Type=Float,Description="Field 'ExAC_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_SIFT_pred,Number=A,Type=Character,Description="Field 'SIFT_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_FATHMM_pred,Number=A,Type=Character,Description="Field 'FATHMM_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_MetaSVM_pred,Number=A,Type=Character,Description="Field 'MetaSVM_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_ESP6500_EA_AF,Number=A,Type=Float,Description="Field 'ESP6500_EA_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_LRT_pred,Number=A,Type=Character,Description="Field 'LRT_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AMR_AC,Number=A,Type=Integer,Description="Field '1000Gp3_AMR_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AFR_AC,Number=A,Type=Integer,Description="Field 'ExAC_AFR_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_GERP___NR,Number=A,Type=Float,Description="Field 'GERP++_NR' from dbNSFP">
+##INFO=<ID=dbNSFP_ESP6500_EA_AC,Number=A,Type=Integer,Description="Field 'ESP6500_EA_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_PROVEAN_pred,Number=A,Type=Character,Description="Field 'PROVEAN_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_Interpro_domain,Number=A,Type=String,Description="Field 'Interpro_domain' from dbNSFP">
+##INFO=<ID=dbNSFP_MutationAssessor_pred,Number=A,Type=Character,Description="Field 'MutationAssessor_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_Adj_AC,Number=A,Type=Integer,Description="Field 'ExAC_Adj_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AFR_AF,Number=A,Type=Float,Description="Field '1000Gp3_AFR_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AMR_AF,Number=A,Type=Float,Description="Field 'ExAC_AMR_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_Adj_AF,Number=A,Type=Float,Description="Field 'ExAC_Adj_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AFR_AC,Number=A,Type=Integer,Description="Field '1000Gp3_AFR_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_FIN_AC,Number=A,Type=Integer,Description="Field 'ExAC_FIN_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ESP6500_AA_AF,Number=A,Type=Float,Description="Field 'ESP6500_AA_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_FIN_AF,Number=A,Type=Float,Description="Field 'ExAC_FIN_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AMR_AC,Number=A,Type=Integer,Description="Field 'ExAC_AMR_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_AFR_AF,Number=A,Type=Float,Description="Field 'ExAC_AFR_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ESP6500_AA_AC,Number=A,Type=Integer,Description="Field 'ESP6500_AA_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HDIV_pred,Number=A,Type=Character,Description="Field 'Polyphen2_HDIV_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_SAS_AC,Number=A,Type=Integer,Description="Field 'ExAC_SAS_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AC,Number=A,Type=Integer,Description="Field '1000Gp3_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_AF,Number=A,Type=Float,Description="Field '1000Gp3_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_EAS_AC,Number=A,Type=Integer,Description="Field 'ExAC_EAS_AC' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_EAS_AF,Number=A,Type=Float,Description="Field 'ExAC_EAS_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_EUR_AF,Number=A,Type=Float,Description="Field '1000Gp3_EUR_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_SAS_AF,Number=A,Type=Float,Description="Field 'ExAC_SAS_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_ExAC_NFE_AF,Number=A,Type=Float,Description="Field 'ExAC_NFE_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_Polyphen2_HVAR_pred,Number=A,Type=Character,Description="Field 'Polyphen2_HVAR_pred' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_EAS_AF,Number=A,Type=Float,Description="Field '1000Gp3_EAS_AF' from dbNSFP">
+##INFO=<ID=dbNSFP_1000Gp3_EUR_AC,Number=A,Type=Integer,Description="Field '1000Gp3_EUR_AC' from dbNSFP">
+##INFO=<ID=GWASCAT_TRAIT,Number=.,Type=String,Description="GWAS catalog: Associated trait">
+##INFO=<ID=GWASCAT_P_VALUE,Number=.,Type=Float,Description="GWAS catalog: p-value">
+##INFO=<ID=GWASCAT_OR_BETA,Number=.,Type=Float,Description="GWAS catalog: OR or Beta">
+##INFO=<ID=GWASCAT_REPORTED_GENE,Number=.,Type=String,Description="GWAS catalog: Reported gene">
+##INFO=<ID=GWASCAT_PUBMED_ID,Number=.,Type=String,Description="GWAS catalog: Original paper's Pubmed ID">
+##INFO=<ID=PhastCons,Number=1,Type=Float,Description="PhastCons conservation score">
+##INFO=<ID=CLNDSDBID,Number=.,Type=String,Description="Variant disease database ID">
+##INFO=<ID=CLNACC,Number=.,Type=String,Description="Variant Accession and Versions">
+##INFO=<ID=CLNDBN,Number=.,Type=String,Description="Variant disease name">
+##INFO=<ID=CLNDSDB,Number=.,Type=String,Description="Variant disease database name">
+##INFO=<ID=CLNHGVS,Number=.,Type=String,Description="Variant names from HGVS.    The order of these variants corresponds to the order of the info in the other clinical  INFO tags.">
+##INFO=<ID=CLNALLE,Number=.,Type=Integer,Description="Variant alleles from REF or ALT columns.  0 is REF, 1 is the first ALT allele, etc.  This is used to match alleles with other corresponding clinical (CLN) INFO tags.  A value of -1 indicates that no allele was found to match a corresponding HGVS allele name.">
+##INFO=<ID=CLNSRCID,Number=.,Type=String,Description="Variant Clinical Channel IDs">
+##INFO=<ID=CLNSRC,Number=.,Type=String,Description="Variant Clinical Chanels">
+##INFO=<ID=CLNORIGIN,Number=.,Type=String,Description="Allele Origin. One or more of the following values may be added: 0 - unknown; 1 - germline; 2 - somatic; 4 - inherited; 8 - paternal; 16 - maternal; 32 - de-novo; 64 - biparental; 128 - uniparental; 256 - not-tested; 512 - tested-inconclusive; 1073741824 - other">
+##INFO=<ID=CLNSIG,Number=.,Type=String,Description="Variant Clinical Significance, 0 - Uncertain significance, 1 - not provided, 2 - Benign, 3 - Likely benign, 4 - Likely pathogenic, 5 - Pathogenic, 6 - drug response, 7 - histocompatibility, 255 - other">
+##INFO=<ID=CLNREVSTAT,Number=.,Type=String,Description="no_assertion - No assertion provided, no_criteria - No assertion criteria provided, single - Criteria provided single submitter, mult - Criteria provided multiple submitters no conflicts, conf - Criteria provided conflicting interpretations, exp - Reviewed by expert panel, guideline - Practice guideline">
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO' ">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">

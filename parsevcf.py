@@ -84,7 +84,7 @@ def read_vcfheader(args, db):
 def read_dbSNP(args, db):
     """ Read information from dbSNP and 1KG extract """
     db['dbsnp'] = {}
-    dbsnpfiles = ['/'+db['freq_main'], '/'+db['freq_new']]
+    dbsnpfiles = ['/'+db['freq_main']]
     for dbsnpfile in dbsnpfiles:
         with open(dbsnpfile, 'r') as fin:
             for line in fin:
@@ -348,17 +348,19 @@ def parse_vcf(args, db, sample, mode):
                 for key,value in zip(db['ANN_header_l'],t_el):
                     ANN_info_d[key] = value
                 # Decide if variant should be kept or skipped
-                # 1. Variant is not in a relevant gene
-                if len(db['genes']) > 0 and ANN_info_d['ANN_Gene_Name'] not in db['genes']:
-                    continue
-                # 2. Variant is not in the right transcript
-                if db['genes'][ANN_info_d['ANN_Gene_Name']][0] != 'NA' and \
-                   db['genes'][ANN_info_d['ANN_Gene_Name']][0] not in ANN_info_d['ANN_Feature_ID']:
-                    continue
+                if len(db['genes']) > 0:
+                    # 1. Variant is not in a relevant gene
+                    if ANN_info_d['ANN_Gene_Name'] not in db['genes']:
+                        continue
+                    # 2. Variant is not in the right transcript
+                    if db['genes'][ANN_info_d['ANN_Gene_Name']][0] != 'NA' and \
+                       db['genes'][ANN_info_d['ANN_Gene_Name']][0] not in ANN_info_d['ANN_Feature_ID']:
+                        continue
+                # A colon in transcript name is ? TODO Find an explanation for this
                 if ':' in ANN_info_d['ANN_Feature_ID']:
                     continue
                 # If information is not known about hg19, estimate it
-                if pos19 == '.' and chrom19 == '.':
+                if pos19 == '.' and chrom19 == '.' and len(db['genes']) > 0:
                     pos19 = int(pos) + db['genes'][ANN_info_d['ANN_Gene_Name']][4]
                     chrom19 = db['genes'][ANN_info_d['ANN_Gene_Name']][1]
                 # Write full report file
@@ -483,9 +485,9 @@ if __name__ == "__main__":
     # Optional argument which requires a parameter (eg. -d test)
     parser.add_argument("-o", "--outfile", action="store", help="Full output", default="annotationreport.txt")
     parser.add_argument("-r", "--reportfile", action="store", help="Smaller report file", default="annotationreport_small.txt")
-    parser.add_argument("-c", "--config", action="store", help="Config file", default="exome.cfg")
-    parser.add_argument("-g", "--genes", action="store", help="List of genes", default="genes.list")
-    parser.add_argument("-s", "--samples", action="store", help="List of samples", default="samples.list")
+    parser.add_argument("-c", "--config", action="store", help="Configuration file", default="exome.cfg")
+    parser.add_argument("-g", "--genes", action="store", help="Genes of interest", default="genes.list")
+    parser.add_argument("-s", "--samples", action="store", help="Samples to include in report", default="samples.list")
     #parser.add_argument("-i", "--info", action="store", help="List of INFO fields to keep", default="info_fields.txt")
     parser.add_argument("-l", "--logfile", action="store", help="Logfile", default="logfile.log")
 

@@ -10,6 +10,7 @@ __license__ = "MIT"
 import argparse
 import sys
 
+
 def read_genes(args, db):
     """ Read a list of genes to include in report, gene list can also contain
         information about transcript_ID, chrom, start, end, offset for conversion to hg19 """
@@ -33,7 +34,6 @@ def read_genes(args, db):
                 conv = int(line_l[5])
             db['genes'][name] = [id_, chrom, start, end, conv]
 
-
 def read_samples(args, db):
     """ Read a list of samples to include in report """
     db['samples'] = []
@@ -42,6 +42,25 @@ def read_samples(args, db):
             if line.startswith('#'):
                 continue
             db['samples'].append(line.strip())
+
+def read_variants(args, db):
+    """ Quick scan of which variants are present """
+    db['scan'] = {}
+    for sid in db['samples']:
+        for mode in ['SNV', 'INDEL']:
+            vcf_file = '{}/VCF/{}_{}.vcf'.format(sid, sid, mode)
+            try:
+                open(vcf_file, 'r')
+            except:
+                continue
+            with open(vcf_file, 'r') as fin:
+                for line in fin:
+                    if line.startswith('#'):
+                        continue
+                    chrom, pos, id_, ref, alt, qual, filter_, info, format_, *samples = line.strip().split('\t')
+                    if filter_ != 'PASS':
+                        continue
+                    db['scan'][chrom, pos] = [id_, ref, alt]
 
 def read_vcfheader(args, db):
     """ Read the information fields that are present in the vcf file and should be included in the report """
@@ -91,6 +110,8 @@ def read_dbSNP(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
+                if (chrom, pos) not in db['scan']:
+                    continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
                         # al = population:allele:frequency
@@ -110,6 +131,8 @@ def read_ESP6500(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
+                if (chrom, pos) not in db['scan']:
+                    continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
                         # al = population:allele:frequency
@@ -171,6 +194,8 @@ def read_clinvar(args, db):
                 if line.startswith('#'):
                     continue
                 chrom,pos,id_,ref,alt,qual,filter_,info = line.strip().split('\t')
+                if (chrom, pos) not in db['scan']:
+                    continue
                 info_l = info.split(';')
                 if (chrom, pos) in db['dbclinvar']:
                     flog.write('WARNING: Multiple ClinVar records for {}:{}\n'.format(chrom,pos))
@@ -192,10 +217,10 @@ def read_mutationtaster(args, db):
             for line in fin:
                 if line.startswith('#'):
                     continue
-                chrom,pos,gene,pheno,allele = line.strip().split('\t')
-                db['dbmutationtaster'][chrom,pos,gene] = [pheno, allele]
+                chrom19,pos19,gene,pheno,allele = line.strip().split('\t')
+                db['dbmutationtaster'][chrom19,pos19,gene] = [pheno, allele]
 
-def read_regions(args, db):
+def read_config(args, db):
     """ Locate file containing regions of interest """
     with open(args.config, 'r') as fin:
         for line in fin:
@@ -437,13 +462,16 @@ def main(args):
     db = {}
     t = time.time()
     read_genes(args, db)
-    print('Genes: {:.3f}s'.format(time.time()-t))
+    print('{}: {:.3f}s'.format(args.genes, time.time()-t))
     t = time.time()
     read_samples(args, db)
-    print('Samples: {:.3f}s'.format(time.time()-t))
+    print('{}: {:.3f}s'.format(args.samples, time.time()-t))
     t = time.time()
-    read_regions(args, db)
-    print('Regions: {:.3f}s'.format(time.time()-t))
+    read_variants(args, db)
+    print('Scanned VCF file: {:.3f}s'.format(time.time() - t))
+    t = time.time()
+    read_config(args, db)
+    print('{}: {:.3f}s'.format(args.config, time.time()-t))
     t = time.time()
     read_vcfheader(args, db)
     print('VCFheaders: {:.3f}s'.format(time.time()-t))
@@ -451,6 +479,7 @@ def main(args):
     do_setup(args, db)
     print('Setup: {:.3f}s'.format(time.time()-t))
     t = time.time()
+    # The following three calls are slow due to loading the whole genome
     read_dbSNP(args, db)
     print('dbSNP: {:.3f}s'.format(time.time()-t))
     t = time.time()
@@ -459,7 +488,6 @@ def main(args):
     t = time.time()
     read_clinvar(args, db)
     print('ClinVar: {:.3f}s'.format(time.time()-t))
-    # The following three calls are slow due to loading the whole genome
     t = time.time()
     read_ESP6500(args, db)
     print('ESP6500: {:.3f}s'.format(time.time()-t))

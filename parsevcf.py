@@ -110,7 +110,7 @@ def read_dbSNP(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
-                if (chrom, pos) not in db['scan']:
+                if (chrom[3:], pos) not in db['scan']:
                     continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
@@ -131,7 +131,7 @@ def read_ESP6500(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
-                if (chrom, pos) not in db['scan']:
+                if (chrom[3:], pos) not in db['scan']:
                     continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):

@@ -232,6 +232,20 @@ def read_config(args, db):
                 continue
             db[key] = value
 
+def read_regions(ars, db):
+    db['regions'] = {}
+    region_file = '/'+db['exon_bed']
+    with open(region_file, 'r') as fin:
+        for reg_line in fin:
+            try:
+                chrom, start, end, name = reg_line.strip().split()
+            except ValueError:
+                continue
+            if chrom not in db['regions']:
+                db['regions'][chrom] = []
+            db['regions'][chrom].append([start, end, name])
+
+
 def do_setup(args, db):
     """ Create files and check that all is in order """
     with open(args.outfile, 'w') as fout:
@@ -254,7 +268,8 @@ def parse_vcf(args, db, sample, mode):
     except:
         sys.stderr.write('Skipping {} {}, missing files\n'.format(sample,mode))
         return
-    with open(vcf_file, 'r') as fin, open(args.outfile, 'a') as fout, open(args.logfile, 'a') as flog, open(args.reportfile, 'a') as ffreq:
+    with open(vcf_file, 'r') as fin, open(args.outfile, 'a') as fout, \
+            open(args.logfile, 'a') as flog, open(args.reportfile, 'a') as ffreq:
         for line in fin:
             if line.startswith('##'): continue
             if line.startswith('#'):
@@ -286,14 +301,9 @@ def parse_vcf(args, db, sample, mode):
                 gonl_frq = {}
             # Gather information about target region
             target_region = 'NA'
-            region_file = '/'+db['exon_bed']
-            with open(region_file, 'r') as reg_fin:
-                for reg_line in reg_fin:
-                    try:
-                        reg_chrom, reg_start, reg_end, reg_name = reg_line.strip().split()
-                    except ValueError:
-                        continue
-                    if chrom == reg_chrom and int(pos) > int(reg_start) and int(pos) < int(reg_end):
+            if chrom in db['regions']:
+                for reg_start, reg_end, reg_name in db['regions'][chrom]:
+                    if int(pos) >= int(reg_start) and int(pos) <= int(reg_end):
                         target_region = reg_name
                         break
             # Collect information about the genotype
@@ -473,13 +483,15 @@ def main(args):
     read_config(args, db)
     print('{}: {:.3f}s'.format(args.config, time.time()-t))
     t = time.time()
+    read_regions(args, db)
+    print('Read regions file: {:.3f}s'.format(time.time() - t))
+    t = time.time()
     read_vcfheader(args, db)
     print('VCFheaders: {:.3f}s'.format(time.time()-t))
     t = time.time()
     do_setup(args, db)
     print('Setup: {:.3f}s'.format(time.time()-t))
     t = time.time()
-    # The following three calls are slow due to loading the whole genome
     read_dbSNP(args, db)
     print('dbSNP: {:.3f}s'.format(time.time()-t))
     t = time.time()
@@ -498,7 +510,9 @@ def main(args):
     read_GONL(args, db)
     print('GONL: {:.3f}s'.format(time.time()-t))
     #read_params(args)
+    t = time.time()
     parse_vcfs(args, db)
+    print('Applying updates: {:.3f}s'.format(time.time() - t))
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """

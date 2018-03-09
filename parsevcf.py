@@ -27,7 +27,7 @@ def read_genes(args, db):
             if len(line_l) > 1:
                 id_ = line_l[1]
             if len(line_l) > 2:
-                chrom = line_l[2]
+                chrom = line_l[2].strip('chr')
             if len(line_l) > 4:
                 start, end = int(line_l[3]), int(line_l[4])
             if len(line_l) > 5:
@@ -58,6 +58,7 @@ def read_variants(args, db):
                     if line.startswith('#'):
                         continue
                     chrom, pos, id_, ref, alt, qual, filter_, info, format_, *samples = line.strip().split('\t')
+                    chrom = chrom.strip('chr')
                     if filter_ != 'PASS':
                         continue
                     db['scan'][chrom, pos] = [id_, ref, alt]
@@ -110,7 +111,8 @@ def read_dbSNP(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
-                if (chrom[3:], pos) not in db['scan']:
+                chrom = chrom.strip('chr')
+                if (chrom, pos) not in db['scan']:
                     continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
@@ -131,7 +133,8 @@ def read_ESP6500(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
-                if (chrom[3:], pos) not in db['scan']:
+                chrom = chrom.strip('chr')
+                if (chrom, pos) not in db['scan']:
                     continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
@@ -241,6 +244,7 @@ def read_regions(ars, db):
                 chrom, start, end, name = reg_line.strip().split()
             except ValueError:
                 continue
+            chrom = chrom.strip('chr')
             if chrom not in db['regions']:
                 db['regions'][chrom] = []
             db['regions'][chrom].append([start, end, name])
@@ -278,17 +282,18 @@ def parse_vcf(args, db, sample, mode):
             chrom,pos,id_,ref,alt,qual,filter_,info,format_,*samples = line.strip().split('\t')
             if filter_ != 'PASS':
                 continue
+            chrom = chrom.strip('chr')
             # Update rs-info and collect extra allelefrequency information
-            if (chrom[3:], pos) in db['dbsnp']:
-                rs, allelefreq, chrom19, pos19 = db['dbsnp'][(chrom[3:],pos)]
+            if (chrom, pos) in db['dbsnp']:
+                rs, allelefreq, chrom19, pos19 = db['dbsnp'][(chrom,pos)]
                 if id_ == '.':
                     id_ = rs
                 if rs not in id_.split(';'):
                     flog.write('Non-matching rs number: {}\t{}\t{}\t{}\n'.format(chrom,pos,id_,rs))
             else:
                 rs, allelefreq, chrom19, pos19 = '.', {}, '.', '.'
-            if (chrom[3:], pos) in db['esp6500']:
-                esp6500_frq = db['esp6500'][(chrom[3:], pos)][1]
+            if (chrom, pos) in db['esp6500']:
+                esp6500_frq = db['esp6500'][(chrom, pos)][1]
             else:
                 esp6500_frq = {}
             if (chrom19, pos19) in db['hgvd']:
@@ -375,7 +380,7 @@ def parse_vcf(args, db, sample, mode):
             else:
                 #flog.write('INFO:\tNo entry named CLNHGVS:\t{}\t{}\t{}\n'.format(sample,chrom,pos))
                 pass
-            # Split ANN field
+            # Split ANN field, this part is the slowest section.
             ann_l = info_d['ANN'].split(',') # Each transcript
             for transcript in ann_l:
                 ANN_info_d = {}
@@ -430,11 +435,11 @@ def parse_vcf(args, db, sample, mode):
             except KeyError:
                 ffreq.write('\tNA')
             try:
-                ffreq.write('\t{}'.format(db['dbclinvar'][chrom[3:],pos]['CLNSIG']))
+                ffreq.write('\t{}'.format(db['dbclinvar'][chrom,pos]['CLNSIG']))
             except KeyError:
                 ffreq.write('\tNA')
             try:
-                pheno, allele = db['dbmutationtaster'][chrom[3:],pos19,target_region]
+                pheno, allele = db['dbmutationtaster'][chrom,pos19,target_region]
                 if ref == allele[0] and alt == allele[2]:
                     ffreq.write('\t{}'.format(pheno))
                 else:
@@ -470,18 +475,28 @@ def main(args):
     """ """
     import time
     db = {}
-    t = time.time()
-    read_genes(args, db)
-    print('{}: {:.3f}s'.format(args.genes, time.time()-t))
-    t = time.time()
-    read_samples(args, db)
-    print('{}: {:.3f}s'.format(args.samples, time.time()-t))
+    try:
+        t = time.time()
+        read_genes(args, db)
+        print('{}: {:.3f}s'.format(args.genes, time.time()-t))
+    except FileNotFoundError:
+        db['genes'] = {}
+    try:
+        t = time.time()
+        read_samples(args, db)
+        print('{}: {:.3f}s'.format(args.samples, time.time()-t))
+    except FileNotFoundError:
+        db['samples'] = []
     t = time.time()
     read_variants(args, db)
     print('Scanned VCF file: {:.3f}s'.format(time.time() - t))
-    t = time.time()
-    read_config(args, db)
-    print('{}: {:.3f}s'.format(args.config, time.time()-t))
+    try:
+        t = time.time()
+        read_config(args, db)
+        print('{}: {:.3f}s'.format(args.config, time.time()-t))
+    except FileNotFoundError:
+        sys.stderr.write('Missing configuration file: {}\n'.format(args.config))
+        return
     t = time.time()
     read_regions(args, db)
     print('Read regions file: {:.3f}s'.format(time.time() - t))

@@ -49,8 +49,8 @@ def make_align(args, db):
         fout.write('-t {} '.format(db['cores']))
         fout.write('-R "@RG\\tID:DM_{}\\tSM:{}\\tPL:Illumina\\tLB:WES\\tPU:unit1" '.format(args.name, args.name))
         fout.write('/data/{}.gz '.format(db['ref_genome']))
-        fout.write('/data/{}/{}1.fastq.gz '.format(db['fastq_dir'], args.name))
-        fout.write('/data/{}/{}2.fastq.gz '.format(db['fastq_dir'], args.name))
+        fout.write('/data/{}/{}.1.fastq.gz '.format(db['fastq_dir'], args.name))
+        fout.write('/data/{}/{}.2.fastq.gz '.format(db['fastq_dir'], args.name))
         fout.write('> /{}/{}/SAM/{}_aligned.sam\n'.format(db['out_dir'], args.name, args.name))
 
 def make_sort(args, db):
@@ -457,7 +457,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Required positional argument
-    parser.add_argument("name", action="store", help="Sample name (everything before '1.fastq.gz')")
+    parser.add_argument("name", action="store", help="Sample name (everything before '.1.fastq.gz')")
 
     # Optional argument flag which defaults to False
     parser.add_argument('-e', '--exome', action="store_true", default=False, help="Exome data")

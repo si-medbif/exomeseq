@@ -584,6 +584,13 @@ def main(args):
         print('ESP6500 database not found.')
     try:
         t = time.time()
+        read_ExAC(args, db)
+        print('ExAc: {:.3f}s'.format(time.time() - t))
+    except FileNotFoundError:
+        db['exac'] = {}
+        print('ExAc database not found.')
+    try:
+        t = time.time()
         read_HGVD(args, db)
         print('HGVD: {:.3f}s'.format(time.time()-t))
     except FileNotFoundError:

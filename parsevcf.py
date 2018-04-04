@@ -217,7 +217,7 @@ def read_GONL(args, db):
 def read_clinvar(args, db):
     """ Read information from ClinVar extract """
     db['dbclinvar'] = {}
-    clinvarfiles = ['/'+db['clinvar_freq1'], '/'+db['clinvar_freq2'], '/'+db['clinvar_freq3']]
+    clinvarfiles = ['/'+db['clinvar_freq']]
     for name in clinvarfiles:
         with open(name, 'r') as fin, open(args.logfile, 'a') as flog:
             for line in fin:
@@ -554,24 +554,48 @@ def main(args):
     t = time.time()
     do_setup(args, db)
     print('Setup: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_dbSNP(args, db)
-    print('dbSNP: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_mutationtaster(args, db)
-    print('mutationtaster: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_clinvar(args, db)
-    print('ClinVar: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_ESP6500(args, db)
-    print('ESP6500: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_HGVD(args, db)
-    print('HGVD: {:.3f}s'.format(time.time()-t))
-    t = time.time()
-    read_GONL(args, db)
-    print('GONL: {:.3f}s'.format(time.time()-t))
+    try:
+        t = time.time()
+        read_dbSNP(args, db)
+        print('dbSNP: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['dbsnp'] = {}
+        print('dbSNP database not found.')
+    try:
+        t = time.time()
+        read_mutationtaster(args, db)
+        print('mutationtaster: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['dbmutationtaster'] = {}
+        print('Mutationtaster database not found.')
+    try:
+        t = time.time()
+        read_clinvar(args, db)
+        print('ClinVar: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['dbclinvar'] = {}
+        print('ClinVar database not found.')
+    try:
+        t = time.time()
+        read_ESP6500(args, db)
+        print('ESP6500: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['esp6500'] = {}
+        print('ESP6500 database not found.')
+    try:
+        t = time.time()
+        read_HGVD(args, db)
+        print('HGVD: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['hgvd'] = {}
+        print('HGVD database not found.')
+    try:
+        t = time.time()
+        read_GONL(args, db)
+        print('GONL: {:.3f}s'.format(time.time()-t))
+    except FileNotFoundError:
+        db['gonl'] = {}
+        print('GoNL database not found.')
     #read_params(args)
     t = time.time()
     parse_vcfs(args, db)

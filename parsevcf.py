@@ -159,6 +159,8 @@ def read_HGVD(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
+                if (chrom, pos) not in db['scan']:
+                    continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
                         # al = population:allele:frequency
@@ -178,6 +180,8 @@ def read_GONL(args, db):
                 allele = {}
                 line_l = line.strip().split()
                 chrom, pos, rs, chrom19, pos19, allelelist = line_l
+                if (chrom, pos) not in db['scan']:
+                    continue
                 if allelelist != 'NA':
                     for al in allelelist.split(','):
                         # al = population:allele:frequency
@@ -220,7 +224,9 @@ def read_mutationtaster(args, db):
             for line in fin:
                 if line.startswith('#'):
                     continue
-                chrom19,pos19,gene,pheno,allele = line.strip().split('\t')
+                chrom,pos,rs,chrom19,pos19,gene,pheno,allele = line.strip().split('\t')
+                if (chrom, pos) not in db['scan']:
+                    continue
                 db['dbmutationtaster'][chrom19,pos19,gene] = [pheno, allele]
 
 def read_config(args, db):

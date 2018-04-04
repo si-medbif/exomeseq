@@ -123,6 +123,29 @@ def read_dbSNP(args, db):
                         allele[a][p] = float(f)
                 db['dbsnp'][chrom,pos] = [rs, allele, chrom19, pos19]
 
+def read_ExAC(args, db):
+    """ Read information from ExAC """
+    db['exac'] = {}
+    dbsnpfiles = ['/'+db['exac_freqfile']]
+    for dbsnpfile in dbsnpfiles:
+        with open(dbsnpfile, 'r') as fin:
+            for line in fin:
+                allele = {}
+                line_l = line.strip().split()
+                chrom, pos, rs, chrom19, pos19, allelelist = line_l
+                chrom = chrom.strip('chr')
+                if (chrom, pos) not in db['scan']:
+                    continue
+                if allelelist != 'NA':
+                    for al in allelelist.split(','):
+                        # al = population:allele:frequency
+                        p, a, f = al.split(':')
+                        if a not in allele:
+                            allele[a] = {}
+                        allele[a][p] = float(f)
+                db['exac'][chrom,pos] = [rs, allele, chrom19, pos19]
+
+
 def read_ESP6500(args, db):
     """ Read information from ESP6500 extract """
     db['esp6500'] = {}
@@ -265,10 +288,20 @@ def do_setup(args, db):
     with open(args.reportfile, 'w') as fout:
         fout.write(('SAMPLE\tCHR\tPOS\tID\tCHR19\tPOS19\tREF\tALT\tREF_AD\tALT_AD\tGENE\t'
                    'KHV_ALT-AF\tCDX_ALT-AF\tAFR_ALT-AF\tAMR_ALT-AF\tEAS_ALT-AF\tEUR_ALT-AF\tSAS_ALT-AF\t'
+                   'ExAC_raw_AF\tExAC_Female_AF\tExAC_Male_AF\tExAC_AFR_AF\tExAC_AMR_AF\tExAC_ASJ_AF\t'
+                   'ExAC_EAS_AF\tExAC_FIN_AF\tExAC_NFE_AF\tExAC_OTH_AF\tExAC_SAS_AF\tExAC_POPMAX_AF\t'
+                   'ExAC_AFR_Male_AF\tExAC_AMR_Male_AF\tExAC_ASJ_Male_AF\tExAC_EAS_Male_AF\t'
+                   'ExAC_FIN_Male_AF\tExAC_NFE_Male_AF\tExAC_OTH_Male_AF\tExAC_SAS_Male_AF\tExAC_AFR_Female_AF\t'
+                   'ExAC_AMR_Female_AF\tExAC_ASJ_Femlae_AF\tExAC_EAS_Female_AF\t'
+                   'ExAC_FIN_Female_AF\tExAC_NFE_Female_AF\tExAC_OTH_Female_AF\tExAC_SAS_Female_AF\t'
                    'EA-AF\tAA-AF\tHGVD\tGONL-AF\t'
                    'CLNSIG\tdbNSFP_MutationTaster_pred\tdbNSFP_SIFT_pred\t'
                    'dbNSFP_phastCons100way_vertebrate\tdbNSFP_FATHMM_pred\tdbNSFP_MetaSVM_pred\n'))
     db['poplist'] = ['KHV', 'CDX', 'AFR', 'AMR', 'EAS', 'EUR', 'SAS']
+    db['exacpoplist'] = ['raw','Female','Male','AFR','AMR','ASJ','EAS','FIN','NFE','OTH','SAS','POPMAX',
+                         'AFR_Male','AMR_Male','ASJ_Male','EAS_Male','FIN_Male','NFE_Male','OTH_Male',
+                         'SAS_Male','AFR_Female','AMR_Female','ASJ_Female','EAS_Female','FIN_Female',
+                         'NFE_Female','OTH_Female','SAS_Female']
 
 def parse_vcf(args, db, sample, mode):
     """ Read the vcf files for one sample """
@@ -302,6 +335,10 @@ def parse_vcf(args, db, sample, mode):
                 esp6500_frq = db['esp6500'][(chrom, pos)][1]
             else:
                 esp6500_frq = {}
+            if (chrom, pos) in db['exac']:
+                exac_frq = db['exac'][(chrom, pos)][1]
+            else:
+                exac_frq = {}
             if (chrom19, pos19) in db['hgvd']:
                 hgvd_frq = db['hgvd'][(''+chrom19, pos19)][1]
             else:
@@ -430,6 +467,11 @@ def parse_vcf(args, db, sample, mode):
             for pop in ['EA', 'AA']:
                 try:
                     ffreq.write('\t{}'.format(esp6500_frq[alt][pop]))
+                except KeyError:
+                    ffreq.write('\tNA')
+            for pop in db['exacpoplist']:
+                try:
+                    ffreq.write('\t{}'.format(exac_frq[alt][pop]))
                 except KeyError:
                     ffreq.write('\tNA')
             try:

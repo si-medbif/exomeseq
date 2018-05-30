@@ -25,6 +25,7 @@ def do_setup(args):
         sys.exit(1)
     shutil.copy2("make_scripts.py", args.name)
     shutil.copy2("parsevcf.py", args.name)
+    shutil.copy2("collect_fastqc_data.py", args.name)
     shutil.copy2("vcf_header.txt", args.name)
     gene_file = "{}/genes.list".format(args.name)
     with open(gene_file, "w") as fout:

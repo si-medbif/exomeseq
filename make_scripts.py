@@ -65,19 +65,25 @@ def make_QC(args, db):
         fout.write("docker run --rm -v /:/data biocontainers/fastqc fastqc ")
         fout.write("-o /data/{}/{}/FastQC ".format(db["out_dir"], args.name, args.name))
         fout.write("-t 2 ")
-        fout.write("/data/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
-        fout.write("/data/{}.2.fastq.gz\n".format(db["fastq_dir"], args.name))
+        fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
+        fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_dir"], args.name))
         fout.write(
-            "unzip /{}/{}/FastQC/{}.1_fastqc.zip\n".format(
-                db["fastq_dir"], args.name, args.name
+            "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
             )
         )
         fout.write(
-            "unzip /{}/{}/FastQC/{}.2_fastqc.zip\n".format(
-                db["fastq_dir"], args.name, args.name
+            "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
             )
         )
         fout.write("# Check FastQC output files\n")
+        fout.write("python /{}/collect_fastqc_data.py -o /{}/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], db["out_dir"],
+                db["out_dir"], args.name, args.name,
+                db["out_dir"], args.name, args.name
+            )
+        )
 
 
 def make_align(args, db):

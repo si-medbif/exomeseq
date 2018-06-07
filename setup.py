@@ -73,7 +73,7 @@ def make_cfg(args):
             "esp6500_freqfile=tiger/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n"
         )
         fout.write("gonl_freqfile=tiger/resources/allelefreqs/GoNL/gonl_freq.txt\n")
-        fout.write("clinvar_freq1=tiger/resources/allelefreqs/clinvar/clinvar.vcf\n")
+        fout.write("clinvar_freq=tiger/resources/allelefreqs/clinvar/clinvar.vcf\n")
         fout.write(
             "mutationtaster=tiger/resources/allelefreqs/mutationtaster/mutationtaster.list\n"
         )

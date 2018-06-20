@@ -669,8 +669,9 @@ def main(args):
     print("Setup: {:.3f}s".format(time.time() - t))
     try:
         t = time.time()
+        print("dbSNP: ",end="")
         read_dbSNP(args, db)
-        print("dbSNP: {:.3f}s".format(time.time() - t))
+        print("{:.3f}s".format(time.time() - t))
     except FileNotFoundError:
         db["dbsnp"] = {}
         print("dbSNP database not found.")
@@ -711,8 +712,9 @@ def main(args):
         print("HGVD database not found.")
     try:
         t = time.time()
+        print("GONL: ", end="")
         read_GONL(args, db)
-        print("GONL: {:.3f}s".format(time.time() - t))
+        print("{:.3f}s".format(time.time() - t))
     except FileNotFoundError:
         db["gonl"] = {}
         print("GoNL database not found.")

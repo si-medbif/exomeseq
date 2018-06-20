@@ -143,12 +143,43 @@ def make_sort(args, db):
 
 def make_deduplicate(args, db):
     """ Creates the script for removing duplicate reads """
-    # TODO: This part is not performed for exome sequencing
-    pass
+    script_file = "/{}/{}/Scripts/3_{}_mark_duplicates.sh".format(
+        db["out_dir"], args.name, args.name
+    )
+    with open(script_file, "w") as fout:
+        fout.write("#!/bin/bash\n")
+        fout.write("set -e\n")
+        fout.write("##-------------\n")
+        fout.write("##Step2: Mark duplicates\n")
+        fout.write("##-------------\n")
+        fout.write(
+            "docker run --rm -v /:/data broadinstitute/picard "
+        )
+        fout.write("MarkDuplicates ")
+        fout.write(
+            "INPUT=/data/{}/{}/BAM/{}_sorted.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "OUTPUT=/data/{}/{}/BAM/{}_deduplicated.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "METRICS_FILE=/data/{}/{}/BAM/{}_deduplication_metrics.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write("CREATE_INDEX=TRUE\n")
+        fout.write("TMP_DIR=/tmp\n")
 
 
 def make_index(args, db):
-    """ Create the script for building the index """
+    """
+    Create the script for building the index
+    Unnecessary, picard can generate index as part of analysis.
+    """
     script_file = "/{}/{}/Scripts/4_{}_build_index.sh".format(
         db["out_dir"], args.name, args.name
     )
@@ -168,6 +199,76 @@ def make_index(args, db):
         )
         fout.write("TMP_DIR=/tmp\n")
 
+def make_realign(args, db):
+    """ Create the script for performing Indel Realingment """
+    script_file = "/{}/{}/Scripts/5_{}_realign_indels.sh".format(
+        db["out_dir"], args.name, args.name
+    )
+    with open(script_file, "w") as fout:
+        fout.write("#!/bin/bash\n")
+        fout.write("set -e\n")
+        fout.write("##-------------\n")
+        fout.write("##Step5-1: Create aligner target\n")
+        fout.write("##-------------\n")
+        fout.write(
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
+        )
+        fout.write("-T RealignerTargetCreator ")
+        fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
+        fout.write("-R /data/{} ".format(db["ref_genome"]))
+        fout.write("-known /data/{} ".format(db["indel_1"]))
+        fout.write("-known /data/{} ".format(db["indel_2"]))
+        fout.write("{} ".format(db["bed_argument"]))
+        fout.write(
+            "-I /data/{}/{}/BAM/{}_deduplicated.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write("-nt {} ".format(db["gatk_num_threads"]))
+        fout.write("-dt NONE ")
+        fout.write(
+            "-o /data/{}/{}/BAM/{}_indel_target_intervals.list ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "-log /data/{}/{}/LOG/5-1_{}_indel_target_intervals.log ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write("\n\n")
+        fout.write("##-------------\n")
+        fout.write("##Step5-2: Realign indels\n")
+        fout.write("##-------------\n")
+        fout.write(
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
+        )
+        fout.write("-T IndelRealigner ")
+        fout.write("-R /data/{} ".format(db["ref_genome"]))
+        fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
+        fout.write(
+            "-I /data/{}/{}/BAM/{}_deduplicated.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "-targetIntervals /data/{}/{}/BAM/{}_indel_target_intervals.list ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write("-known /data/{} ".format(db["indel_1"]))
+        fout.write("-known /data/{} ".format(db["indel_2"]))
+        fout.write("-dt NONE ")
+        fout.write(
+            "-o /data/{}/{}/BAM/{}_realigned.bam ".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "-log /data/{}/{}/LOG/5-2_{}_realign_indels.log\n".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
 
 def make_BQSR(args, db):
     """ Create the script for performing Base Quality Score Recalibration """
@@ -238,7 +339,7 @@ def make_BQSR(args, db):
             )
         )
         fout.write(
-            "-log /data/{}/{}/LOG/6-4_{}_final_bam.log\n".format(
+            "-log /data/{}/{}/LOG/6-4_{}_perform_bqsr.log\n".format(
                 db["out_dir"], args.name, args.name
             )
         )
@@ -511,12 +612,6 @@ def make_masterscript(args, db):
             )
         )
         fout.write(
-            "(bash /{}/{}/Scripts/4_{}_build_index.sh) 2>&1 | tee /{}/{}/LOG/4_{}_building_index.log\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
-            )
-        )
-
-        fout.write(
             "if [[ -e /{}/{}/BAM/{}_sorted.bam ]] ; then\n".format(
                 db["out_dir"], args.name, args.name
             )
@@ -527,6 +622,21 @@ def make_masterscript(args, db):
             )
         )
         fout.write("fi\n")
+        fout.write(
+            "(bash /{}/{}/Scripts/3_{}_mark_duplicates.sh) 2>&1 | tee /{}/{}/LOG/3_{}_sort.log\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "#(bash /{}/{}/Scripts/4_{}_build_index.sh) 2>&1 | tee /{}/{}/LOG/4_{}_building_index.log\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
+            )
+        )
+        fout.write(
+            "bash /{}/{}/Scripts/5_{}_realign_indels.sh\n".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
 
         fout.write(
             "bash /{}/{}/Scripts/6_{}_recalibrate_base.sh\n".format(
@@ -540,7 +650,7 @@ def make_masterscript(args, db):
             )
         )
         fout.write(
-            "    rm -f /{}/{}/BAM/{}_{{sorted,realigned}}.{{bam,bai}}\n".format(
+            "    rm -f /{}/{}/BAM/{}_{{sorted,realigned,deduplicated}}.{{bam,bai}}\n".format(
                 db["out_dir"], args.name, args.name
             )
         )

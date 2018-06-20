@@ -53,50 +53,58 @@ def make_cfg(args):
     """ Create the configuration file with location of required files and folders """
     cfg_file = "{}/exome.cfg".format(args.name)
     with open(cfg_file, "w") as fout:
+        fout.write("##################\n")
         fout.write("# Folders containing input and output files\n")
+        fout.write("##################\n")
         if args.fastq is not None:
             fout.write("fastq_dir={}/fastq\n".format(args.fastq[1:]))
         else:
             fout.write("fastq_dir={}/fastq\n".format(args.name[1:]))
         fout.write("out_dir={}\n".format(args.name[1:]))
+        fout.write("##################\n")
         fout.write("# Project specific reference files\n")
+        fout.write("##################\n")
         if args.regions38 is not None:
             fout.write("exon_bed={}\n".format(args.regions38.strip("/")))
         else:
             fout.write("exon_bed=NA\n")
-        fout.write("freq_main=tiger/resources/allelefreqs/1KG/variants_hg38.frq\n")
+        fout.write("freq_main=<CHANGEME>/resources/allelefreqs/1KG/variants_hg38.frq\n")
         fout.write(
-            "exac_freqfile=tiger/resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n"
+            "exac_freqfile=<CHANGEME>/resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n"
         )
-        fout.write("hgvd_freqfile=tiger/resources/allelefreqs/HGVD/HGVD_freq.txt\n")
+        fout.write("hgvd_freqfile=<CHANGEME>/resources/allelefreqs/HGVD/HGVD_freq.txt\n")
         fout.write(
-            "esp6500_freqfile=tiger/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n"
+            "esp6500_freqfile=<CHANGEME>/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n"
         )
-        fout.write("gonl_freqfile=tiger/resources/allelefreqs/GoNL/gonl_freq.txt\n")
-        fout.write("clinvar_freq=tiger/resources/allelefreqs/clinvar/clinvar.vcf\n")
+        fout.write("gonl_freqfile=<CHANGEME>/resources/allelefreqs/GoNL/gonl_freq.txt\n")
+        fout.write("clinvar_freq=<CHANGEME>/resources/allelefreqs/clinvar/clinvar.vcf\n")
         fout.write(
-            "mutationtaster=tiger/resources/allelefreqs/mutationtaster/mutationtaster.list\n"
+            "mutationtaster=<CHANGEME>/resources/allelefreqs/mutationtaster/mutationtaster.list\n"
         )
         fout.write("# Generic reference files\n")
-        fout.write("ref_dir=tiger/resources/hg38bundle\n")
+        fout.write("ref_dir=<CHANGEME>/resources/hg38bundle\n")
         fout.write(
-            "ref_genome=tiger/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n"
+            "ref_genome=<CHANGEME>/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n"
         )
         fout.write(
-            "indel_1=tiger/resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n"
+            "indel_1=<CHANGEME>/resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n"
         )
         fout.write(
-            "indel_2=tiger/resources/hg38bundle/Homo_sapiens_assembly38.known_indels.vcf.gz\n"
+            "indel_2=<CHANGEME>/resources/hg38bundle/Homo_sapiens_assembly38.known_indels.vcf.gz\n"
         )
-        fout.write("DBSNP=tiger/resources/hg38bundle/dbsnp_144.hg38.vcf.gz\n")
+        fout.write("DBSNP=<CHANGEME>/resources/hg38bundle/dbsnp_144.hg38.vcf.gz\n")
+        fout.write("##################\n")
         fout.write("# Parameter settings\n")
+        fout.write("##################\n")
         fout.write("cores=4\n")
         fout.write("gatk_num_threads=1\n")
         fout.write("gatk_num_cpu_threads=4\n")
         fout.write("java_mem=8G\n")
+        fout.write("##################\n")
         fout.write(
             "# DO NOT CHANGE! The following directories refer to locations within the docker image for snpeff\n"
         )
+        fout.write("##################\n")
         fout.write("snpeff_dir=/home/snpeff/snpEff\n")
         fout.write("DBNSFP=/home/snpeff/snpEff/data/dbNSFP3.4a.txt.gz\n")
         fout.write(

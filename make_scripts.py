@@ -97,7 +97,7 @@ def make_align(args, db):
         fout.write("##-------------\n")
         fout.write("##Step1: Align\n")
         fout.write("##-------------\n")
-        fout.write("docker run --rm -v /:/data biodckr/bwa bwa mem ")
+        fout.write("docker run --rm -v /:/data biocontainers/bwa bwa mem ")
         fout.write("-t {} ".format(db["cores"]))
         fout.write(
             '-R "@RG\\tID:DM_{}\\tSM:{}\\tPL:Illumina\\tLB:WES\\tPU:unit1" '.format(
@@ -124,7 +124,7 @@ def make_sort(args, db):
         fout.write("##Step2: Sort\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data biodckr/picard /opt/conda/jre/bin/java -Xmx30G -jar /opt/conda/share/picard-2.3.0-0/picard.jar "
+            "docker run --rm -v /:/data broadinstitute/picard "
         )
         fout.write("SortSam ")
         fout.write(
@@ -158,7 +158,7 @@ def make_index(args, db):
         fout.write("##-------------\n")
         fout.write("##Step4: Build Index\n")
         fout.write(
-            "docker run --rm -v /:/data biodckr/picard /opt/conda/jre/bin/java -Xmx30G -jar /opt/conda/share/picard-2.3.0-0/picard.jar "
+            "docker run --rm -v /:/data broadinstitute/picard "
         )
         fout.write("BuildBamIndex ")
         fout.write(

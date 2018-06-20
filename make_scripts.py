@@ -1010,6 +1010,7 @@ def variant_call_pipeline(args):
     make_sort(args, cfg_db)
     make_deduplicate(args, cfg_db)
     make_index(args, cfg_db)
+    make_realign(args, cfg_db)
     make_BQSR(args, cfg_db)
     make_call_haplotype(args, cfg_db)
     make_genotype(args, cfg_db)

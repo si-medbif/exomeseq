@@ -293,7 +293,7 @@ def make_BQSR(args, db):
         fout.write("{} ".format(db["bed_argument"]))
         fout.write("--interval_padding 100 ")
         fout.write(
-            "-I /data/{}/{}/BAM/{}_sorted.bam ".format(
+            "-I /data/{}/{}/BAM/{}_realigned.bam ".format(
                 db["out_dir"], args.name, args.name
             )
         )
@@ -321,7 +321,7 @@ def make_BQSR(args, db):
         fout.write("-R /data/{} ".format(db["ref_genome"]))
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write(
-            "-I /data/{}/{}/BAM/{}_sorted.bam ".format(
+            "-I /data/{}/{}/BAM/{}_realigned.bam ".format(
                 db["out_dir"], args.name, args.name
             )
         )

@@ -728,26 +728,23 @@ if __name__ == "__main__":
     """ This is executed when run from the command line """
     parser = argparse.ArgumentParser()
 
-    # Required positional argument
-    # parser.add_argument("arg", help="Required positional argument")
-
-    # Optional argument flag which defaults to False
-    parser.add_argument("-f", "--flag", action="store_true", default=False)
-
-    # Optional argument which requires a parameter (eg. -d test)
     parser.add_argument(
         "-o",
         "--outfile",
         action="store",
-        help="Full output",
-        default="annotationreport.txt",
+        help="Name of full output",
     )
     parser.add_argument(
         "-r",
         "--reportfile",
         action="store",
-        help="Smaller report file",
-        default="annotationreport_small.txt",
+        help="Name of allelel frequency report",
+    )
+    parser.add_argument(
+        "-t",
+        "--transcripts",
+        action="store",
+        help="File with list of the transcripts to include in report",
     )
     parser.add_argument(
         "-c", "--config", action="store", help="Configuration file", default="exome.cfg"

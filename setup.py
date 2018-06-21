@@ -81,7 +81,9 @@ def make_cfg(args):
         fout.write(
             "mutationtaster=<CHANGEME>/resources/allelefreqs/mutationtaster/mutationtaster.list\n"
         )
+        fout.write("##################\n")
         fout.write("# Generic reference files\n")
+        fout.write("##################\n")
         fout.write("ref_dir=<CHANGEME>/resources/hg38bundle\n")
         fout.write(
             "ref_genome=<CHANGEME>/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n"

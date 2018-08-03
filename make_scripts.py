@@ -20,7 +20,7 @@ def read_config(args):
                 continue
             key, value = line.strip().split("=")
             db[key] = value
-        if "exon_bed" in db:
+        if "exon_bed" in db and db["exon_bed"] != "NA":
             db["bed_argument"] = "-L /data/{}".format(db["exon_bed"])
     return db
 
@@ -78,8 +78,8 @@ def make_QC(args, db):
             )
         )
         fout.write("# Check FastQC output files\n")
-        fout.write("python /{}/collect_fastqc_data.py -o /{}/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
-                db["out_dir"], db["out_dir"],
+        fout.write("python /{}/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], db["out_dir"], args.name,
                 db["out_dir"], args.name, args.name,
                 db["out_dir"], args.name, args.name
             )
@@ -150,7 +150,7 @@ def make_deduplicate(args, db):
         fout.write("#!/bin/bash\n")
         fout.write("set -e\n")
         fout.write("##-------------\n")
-        fout.write("##Step2: Mark duplicates\n")
+        fout.write("##Step3: Mark duplicates\n")
         fout.write("##-------------\n")
         fout.write(
             "docker run --rm -v /:/data broadinstitute/picard "
@@ -167,7 +167,7 @@ def make_deduplicate(args, db):
             )
         )
         fout.write(
-            "METRICS_FILE=/data/{}/{}/BAM/{}_deduplication_metrics.bam ".format(
+            "METRICS_FILE=/data/{}/{}/BAM/{}_deduplication_metrics.txt ".format(
                 db["out_dir"], args.name, args.name
             )
         )
@@ -1037,10 +1037,10 @@ if __name__ == "__main__":
         "name", action="store", help="Sample name (everything before '.1.fastq.gz')"
     )
 
-    # Optional argument flag which defaults to False
-    parser.add_argument(
-        "-e", "--exome", action="store_true", default=False, help="Exome data"
-    )
+    # Dependant on the user providing a region bed-file. Optional argument flag which defaults to True
+    #parser.add_argument(
+    #    "-e", "--exome", action="store_false", default=True, help="If not using Exome data"
+    #)
     parser.add_argument(
         "-r",
         "--replacement",

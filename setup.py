@@ -11,42 +11,31 @@ import argparse
 import os
 import sys
 import shutil
+import subprocess
+import glob
 
 
 def do_setup(args):
+    """
+    This file should be located in the exomeseq sub-folder to the project folder
+    :param args:
+    :return:
+    """
     try:
-        os.mkdir("{}".format(args.name))
-        os.chmod("{}".format(args.name), 0o777)
-        os.mkdir("{}/fastq".format(args.name))
-        os.chmod("{}/fastq".format(args.name), 0o777)
+        os.mkdir("{}/fastq_paired".format(args.name))
+        os.chmod("{}/fastq_paired".format(args.name), 0o777)
+        os.mkdir("{}/fastq_single".format(args.name))
+        os.chmod("{}/fastq_single".format(args.name), 0o777)
+        os.mkdir("{}/resources".format(args.name))
+        os.chmod("{}/resources".format(args.name), 0o777)
+        os.mkdir("{}/resources/hg38bundle".format(args.name))
+        os.chmod("{}/resources/hg38bundle".format(args.name), 0o777)
+        os.mkdir("{}/resources/snpeff_db".format(args.name))
+        os.chmod("{}/resources/snpeff_db".format(args.name), 0o777)
     except FileExistsError:
         sys.stderr.write("ERROR! Project folder already exists...\n")
         # While testing, just keep this as a warning.
-        sys.exit(1)
-    shutil.copy2("make_scripts.py", args.name)
-    shutil.copy2("parsevcf.py", args.name)
-    shutil.copy2("collect_fastqc_data.py", args.name)
-    shutil.copy2("vcf_header.txt", args.name)
-    gene_file = "{}/genes.list".format(args.name)
-    with open(gene_file, "w") as fout:
-        fout.write(
-            "# List all genes that should be included in the report (if different from all).\n"
-        )
-    sample_file = "{}/samples.list".format(args.name)
-    with open(sample_file, "w") as fout:
-        fout.write("# List of samples that will be included in the generated report\n")
-
-
-def check_args(args):
-    if not args.name.startswith("/"):
-        sys.stderr.write("ERROR! Invalid path\n")
-        sys.stderr.write("Please provide full path, starting with root folder.\n")
-        sys.exit(1)
-    if args.fastq is not None and not args.fastq.startswith("/"):
-        sys.stderr.write(
-            'Fastq folder must be located somewhere under root ("/"), and must contain the full path.\n'
-        )
-        sys.exit(1)
+        #sys.exit(1)
 
 
 def make_cfg(args):
@@ -67,34 +56,36 @@ def make_cfg(args):
         if args.regions38 is not None:
             fout.write("exon_bed={}\n".format(args.regions38.strip("/")))
         else:
-            fout.write("exon_bed=NA\n")
-        fout.write("freq_main=<CHANGEME>/resources/allelefreqs/1KG/variants_hg38.frq\n")
-        fout.write(
-            "exac_freqfile=<CHANGEME>/resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n"
-        )
-        fout.write("hgvd_freqfile=<CHANGEME>/resources/allelefreqs/HGVD/HGVD_freq.txt\n")
-        fout.write(
-            "esp6500_freqfile=<CHANGEME>/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n"
-        )
-        fout.write("gonl_freqfile=<CHANGEME>/resources/allelefreqs/GoNL/gonl_freq.txt\n")
-        fout.write("clinvar_freq=<CHANGEME>/resources/allelefreqs/clinvar/clinvar.vcf\n")
-        fout.write(
-            "mutationtaster=<CHANGEME>/resources/allelefreqs/mutationtaster/mutationtaster.list\n"
-        )
+            fout.write("exon_bed={}/regions38.bed\n".format(args.name[1:]))
+        # These are files with SNP allele frequencies, will not be universally applicable
+        if args.afdb:
+            fout.write("freq_main={}/resources/allelefreqs/1KG/variants_hg38.frq\n".format(args.name[1:]))
+            fout.write(
+                "exac_freqfile={}/resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n".format(args.name[1:])
+            )
+            fout.write("hgvd_freqfile={}/resources/allelefreqs/HGVD/HGVD_freq.txt\n".format(args.name[1:]))
+            fout.write(
+                "esp6500_freqfile={}/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n".format(args.name[1:])
+            )
+            fout.write("gonl_freqfile={}/resources/allelefreqs/GoNL/gonl_freq.txt\n".format(args.name[1:]))
+            fout.write("clinvar_freq={}/resources/allelefreqs/clinvar/clinvar.vcf\n".format(args.name[1:]))
+            fout.write(
+                "mutationtaster={}/resources/allelefreqs/mutationtaster/mutationtaster.list\n".format(args.name[1:])
+            )
         fout.write("##################\n")
         fout.write("# Generic reference files\n")
         fout.write("##################\n")
-        fout.write("ref_dir=<CHANGEME>/resources/hg38bundle\n")
+        fout.write("ref_dir={}/resources/hg38bundle\n".format(args.name[1:]))
         fout.write(
-            "ref_genome=<CHANGEME>/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n"
+            "ref_genome={}/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n".format(args.name[1:])
         )
         fout.write(
-            "indel_1=<CHANGEME>/resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n"
+            "indel_1={}/resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n".format(args.name[1:])
         )
-        fout.write(
-            "indel_2=<CHANGEME>/resources/hg38bundle/Homo_sapiens_assembly38.known_indels.vcf.gz\n"
-        )
-        fout.write("DBSNP=<CHANGEME>/resources/hg38bundle/dbsnp_144.hg38.vcf.gz\n")
+        #fout.write(
+        #    "indel_2={}/resources/hg38bundle/Homo_sapiens_assembly38.known_indels.vcf.gz\n".format(args.name[1:])
+        #)
+        fout.write("DBSNP={}/resources/hg38bundle/dbsnp_146.hg38.vcf.gz\n".format(args.name[1:]))
         fout.write("##################\n")
         fout.write("# Parameter settings\n")
         fout.write("##################\n")
@@ -115,10 +106,59 @@ def make_cfg(args):
         fout.write("PHASTCONS=/home/snpeff/snpEff/data/phastCons100way\n")
         fout.write("CLINVAR=/home/snpeff/snpEff/data/clinvar.vcf\n")
 
+def process_fastq(args):
+    file_list = glob.glob("*.*")
+    samples = {}
+    count_bed = 0
+    for filename in file_list:
+        lf = filename.rsplit('.',3)
+        if lf[-1] == 'bed':
+            count_bed += 1
+            continue
+        elif len(lf) < 4 or lf[1] not in ['0','1','2'] or lf[2] not in ['fastq'] or lf[3] not in ['gz']:
+            sys.stdout.write('WARNING: Unexpected file {}.\n'.format(filename))
+            continue
+        samples[lf[0]] = samples.get(lf[0], 0) + 1
+    with open('samples.paired.list', 'w') as fout2, open('samples.single.list', 'w') as fout1:
+        for filename in file_list:
+            lf = filename.rsplit('.', 3)
+            if lf[-1] == 'bed' and count_bed == 1:
+                sys.stdout.write('Found one bed file {}, will use for region file.'.format(filename))
+                args.regions38 = filename
+                continue
+            elif len(lf) < 4 or lf[1] not in ['0', '1', '2'] or lf[2] not in ['fastq'] or lf[3] not in ['gz']:
+                continue
+            if lf[1] in ['1','2']:
+                if samples[lf[0]] == 2:
+                    shutil.move(filename,"fastq_paired/")
+                    if lf[1] == '1':
+                        fout2.write('{}\n'.format(lf[0]))
+                    continue
+                else:
+                    sys.stderr.write(
+                        'ERROR: File {} is indicated as one of a pair but the matching file is missing.'.format(filename))
+                    continue
+            if lf[1] in ['0']:
+                if samples[lf[0]] == 1:
+                    shutil.move(filename,"fastq_single/")
+                    fout1.write('{}\n'.format(lf[0]))
+                else:
+                    sys.stderr.write(
+                        'ERROR: File {} is indicated as single, but there is another file with same sample name.'.format(filename))
+                    continue
 
 def main(args):
-    check_args(args)
+    # Determine current folder, this should be the top project folder
+    # Everything else should go below this
+    # Adjust location if this script is run from the 'exomeseq' folder
+    args.name = os.getcwd()
+    ln = args.name.split('/')
+    if ln[-1] == 'exomeseq':
+        args.name = '/'.join(ln[0:-1])
+    # Create folder structure, download references, make configuration
+    # file and populate it with the available references.
     do_setup(args)
+    process_fastq(args)
     make_cfg(args)
 
 
@@ -126,14 +166,6 @@ if __name__ == "__main__":
     """ This is executed when run from the command line """
     parser = argparse.ArgumentParser()
 
-    # Required positional argument
-    parser.add_argument(
-        "name", action="store", help="Main folder for project (full path)"
-    )
-
-    # Optional argument flag which defaults to False
-
-    # Optional argument which requires a parameter (eg. -d test)
     parser.add_argument(
         "-f",
         "--fastq",
@@ -142,8 +174,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-r", "--regions38", help="Bed file with hg38 region information (full path)."
     )
-    # parser.add_argument("-s", "--regions19", help="Bed file with hg19 region information.")
-
+    parser.add_argument("-a", "--afdb", action="store_true", default=False, help="Include allele frequency databases.")
     # Optional verbosity counter (eg. -v, -vv, -vvv, etc.)
     parser.add_argument(
         "-v", "--verbose", action="count", default=0, help="Verbosity (-v, -vv, etc)"

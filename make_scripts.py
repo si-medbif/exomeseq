@@ -65,7 +65,7 @@ def make_QC(args, db):
         fout.write("docker run --rm -v /:/data biocontainers/fastqc fastqc ")
         fout.write("-o /data/{}/{}/FastQC ".format(db["out_dir"], args.name, args.name))
         fout.write("-t 2 ")
-        if args.paired:
+        if not args.single:
             fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
             fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name))
             fout.write(
@@ -120,7 +120,7 @@ def make_align(args, db):
             )
         )
         fout.write("/data/{}.gz ".format(db["ref_genome"]))
-        if args.paired:
+        if not args.single:
             fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
             fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
         else:
@@ -1090,6 +1090,7 @@ if __name__ == "__main__":
 
     # Optional argument which requires a parameter (eg. -d test)
     parser.add_argument("-c", "--config", action="store", default="exome.cfg")
+    parser.add_argument("-s", "--single", action="store_true", default=False, help="If single end reads")
 
     # Optional verbosity counter (eg. -v, -vv, -vvv, etc.)
     parser.add_argument(

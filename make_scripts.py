@@ -65,26 +65,41 @@ def make_QC(args, db):
         fout.write("docker run --rm -v /:/data biocontainers/fastqc fastqc ")
         fout.write("-o /data/{}/{}/FastQC ".format(db["out_dir"], args.name, args.name))
         fout.write("-t 2 ")
-        fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
-        fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_dir"], args.name))
-        fout.write(
-            "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+        if args.paired:
+            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name))
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
             )
-        )
-        fout.write(
-            "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
             )
-        )
-        fout.write("# Check FastQC output files\n")
-        fout.write("python /{}/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
-                db["out_dir"], db["out_dir"], args.name,
-                db["out_dir"], args.name, args.name,
-                db["out_dir"], args.name, args.name
+            fout.write("# Check FastQC output files\n")
+            fout.write("python /{}/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], db["out_dir"], args.name,
+                    db["out_dir"], args.name, args.name,
+                    db["out_dir"], args.name, args.name
+                )
             )
-        )
-
+        else:
+            fout.write("/data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name))
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC/{}.0_fastqc /{}/{}/FastQC/{}.0_fastqc.zip {}.0_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
+            )
+            fout.write("# Check FastQC output files\n")
+            fout.write(
+                "python /{}/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.0_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], db["out_dir"], args.name,
+                    db["out_dir"], args.name, args.name,
+                    db["out_dir"], args.name, args.name
+                )
+            )
 
 def make_align(args, db):
     """ Creates the script for aligning reads """
@@ -105,8 +120,11 @@ def make_align(args, db):
             )
         )
         fout.write("/data/{}.gz ".format(db["ref_genome"]))
-        fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
-        fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_dir"], args.name))
+        if args.paired:
+            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+        else:
+            fout.write("/data/{}/{}.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
         fout.write(
             "> /{}/{}/SAM/{}_aligned.sam\n".format(db["out_dir"], args.name, args.name)
         )

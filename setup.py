@@ -45,10 +45,8 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# Folders containing input and output files\n")
         fout.write("##################\n")
-        if args.fastq is not None:
-            fout.write("fastq_dir={}/fastq\n".format(args.fastq[1:]))
-        else:
-            fout.write("fastq_dir={}/fastq\n".format(args.name[1:]))
+        fout.write("fastq_paired_dir={}/fastq_paired\n".format(args.name[1:]))
+        fout.write("fastq_single_dir={}/fastq_single\n".format(args.name[1:]))
         fout.write("out_dir={}\n".format(args.name[1:]))
         fout.write("##################\n")
         fout.write("# Project specific reference files\n")
@@ -166,11 +164,6 @@ if __name__ == "__main__":
     """ This is executed when run from the command line """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "-f",
-        "--fastq",
-        help="Folder containing fastq files, if files are to be kept separate.",
-    )
     parser.add_argument(
         "-r", "--regions38", help="Bed file with hg38 region information (full path)."
     )

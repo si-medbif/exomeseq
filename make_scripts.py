@@ -216,8 +216,14 @@ def make_realign(args, db):
         fout.write("-T RealignerTargetCreator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
-        fout.write("-known /data/{} ".format(db["indel_1"]))
-        fout.write("-known /data/{} ".format(db["indel_2"]))
+        try:
+            fout.write("-known /data/{} ".format(db["indel_1"]))
+        except KeyError:
+            pass
+        try:
+            fout.write("-known /data/{} ".format(db["indel_2"]))
+        except KeyError:
+            pass
         fout.write("{} ".format(db["bed_argument"]))
         fout.write(
             "-I /data/{}/{}/BAM/{}_deduplicated.bam ".format(
@@ -256,8 +262,14 @@ def make_realign(args, db):
                 db["out_dir"], args.name, args.name
             )
         )
-        fout.write("-known /data/{} ".format(db["indel_1"]))
-        fout.write("-known /data/{} ".format(db["indel_2"]))
+        try:
+            fout.write("-known /data/{} ".format(db["indel_1"]))
+        except KeyError:
+            pass
+        try:
+            fout.write("-known /data/{} ".format(db["indel_2"]))
+        except KeyError:
+            pass
         fout.write("-dt NONE ")
         fout.write(
             "-o /data/{}/{}/BAM/{}_realigned.bam ".format(
@@ -287,9 +299,18 @@ def make_BQSR(args, db):
         fout.write("-T BaseRecalibrator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
-        fout.write("-knownSites /data/{} ".format(db["indel_1"]))
-        fout.write("-knownSites /data/{} ".format(db["indel_2"]))
-        fout.write("-knownSites /data/{} ".format(db["DBSNP"]))
+        try:
+            fout.write("-knownSites /data/{} ".format(db["indel_1"]))
+        except KeyError:
+            pass
+        try:
+            fout.write("-knownSites /data/{} ".format(db["indel_2"]))
+        except KeyError:
+            pass
+        try:
+            fout.write("-knownSites /data/{} ".format(db["DBSNP"]))
+        except KeyError:
+            pass
         fout.write("{} ".format(db["bed_argument"]))
         fout.write("--interval_padding 100 ")
         fout.write(

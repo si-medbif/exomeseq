@@ -79,7 +79,7 @@ def make_QC(args, db):
                 )
             )
             fout.write("# Check FastQC output files\n")
-            fout.write("python /{}/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+            fout.write("python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], db["out_dir"], args.name,
                     db["out_dir"], args.name, args.name,
                     db["out_dir"], args.name, args.name

@@ -22,6 +22,10 @@ cat dbNSFP3.5a_variant.chr* | grep -v ^# >> dbNSFPv3.5a.txt
 bgzip dbNSFPv3.5a.txt > tabix -s 1 -b 2 -e 2 dbNSFPv3.5a.txt.gz
 # More databases
 wget --recursive --no-parent -l2 http://hgdownload-test.cse.ucsc.edu/goldenPath/hg38/phastCons100way/
+#*Should not be necessary if the above command works properly.
+mv hgdownload-test.cse.ucsc.edu/goldenPath/hg38/phastCons100way/ phastCons100way
+rm -rf hgdownload-test.cse.ucsc.edu/
+#****
 wget ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20180729.vcf.gz*
 wget ftp://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-catalog-associations.tsv
 cd ../..
@@ -45,7 +49,7 @@ done
 ##########
 for SAMPLE in `cat samples.paired.list`;
 do
-    exomeseq/${SAMPLE}_GATK.sh
-    exomeseq/${SAMPLE}_annotate.sh
+    ./${SAMPLE}_GATK.sh
+    ./${SAMPLE}_annotate.sh
     exomeseq/parsevcf.py
 done

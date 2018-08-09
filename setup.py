@@ -95,11 +95,11 @@ def make_cfg(args):
         fout.write("# SNPEff databases\n")
         fout.write("##################\n")
         fout.write("snpeff_dir=/home/snpeff/snpEff\n")
-        fout.write("DBNSFP={}/resources/snpeff_db/dbNSFP3.4a.txt.gz\n".format(args.name[1:]))
+        fout.write("DBNSFP={}/resources/snpeff_db/dbNSFPv3.5a.txt.gz\n".format(args.name[1:]))
         fout.write(
-            "GWASCATALOG={}/resources/snpeff_db/gwas_catalog_v1.0.1-associations_e84_r2016-07-10.tsv\n".format(args.name[1:]))
+            "GWASCATALOG={}/resources/snpeff_db/gwas-catalog-associations.tsv\n".format(args.name[1:]))
         fout.write("PHASTCONS={}/resources/snpeff_db/phastCons100way\n".format(args.name[1:]))
-        fout.write("CLINVAR={}/resources/snpeff_db/clinvar.vcf\n".format(args.name[1:]))
+        fout.write("CLINVAR={}/resources/snpeff_db/clinvar_20180729.vcf.gz\n".format(args.name[1:]))
 
 def process_fastq(args):
     file_list = glob.glob("*.*")

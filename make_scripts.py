@@ -101,6 +101,59 @@ def make_QC(args, db):
                 )
             )
 
+def make_trimfastq(args, db):
+    """ Creates the script for running FastQC """
+    script_file = "/{}/{}/Scripts/0a_{}_trimfastq.sh".format(
+        db["out_dir"], args.name, args.name
+    )
+    with open(script_file, "w") as fout:
+        fout.write("#!/bin/bash\n")
+        fout.write("set -e\n")
+        fout.write("##-------------\n")
+        fout.write("##Step0a: Trimmomatic\n")
+        fout.write("##-------------\n")
+        fout.write("docker run --rm -v /:/data fjukstad/trimmomatic ")
+        if not args.single:
+            fout.write("PE ")
+        else:
+            fout.write("SE ")
+        fout.write("-phred33 ")
+        fout.write("-threads {} ".format(db["cores"]))
+        fout.write("-trimlog {}/LOG/0a_{}_trimfastq.log ".format(db["out_dir"],args.name))
+        if not args.single:
+            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/temp_paired.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/temp_unpaired.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/temp_paired.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/temp_unpaired.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+        else:
+            fout.write("/data/{}/{}.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
+            fout.write("/data/{}/temp_single.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
+        fout.write("LEADING:3 ")
+        fout.write("TRAILING:3 ")
+        fout.write("SLIDINGWINDOW:4:15 ")
+        fout.write("MINLEN:36\n")
+        if not args.single:
+            fout.write("mv /data/{}/{}.1.fastq.gz /data/{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv /data/{}/{}.2.fastq.gz /data/{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv /data/{}/temp_paired.1.fastq.gz /data/{}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], db["fastq_paired_dir"], args.name))
+            fout.write("mv /data/{}/temp_paired.2.fastq.gz /data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"],
+                                                                                            db["fastq_paired_dir"],
+                                                                                            args.name)
+                       )
+            fout.write("mv /data/{}/temp_unpaired.1.fastq.gz /data/{}/{}.unpaired.1.fastq.gz\n".format(db["fastq_paired_dir"],
+                                                                                            db["fastq_paired_dir"],
+                                                                                            args.name)
+                       )
+            fout.write("mv /data/{}/temp_unpaired.2.fastq.gz /data/{}/{}.unpaired.2.fastq.gz\n".format(db["fastq_paired_dir"],
+                                                                                            db["fastq_paired_dir"],
+                                                                                            args.name)
+                       )
+        else:
+            fout.write("mv /data/{}/{}.0.fastq.gz /data/{}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
+            fout.write("mv /data/{}/temp_single.0.fastq.gz /data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], db["fastq_single_dir"], args.name))
+
 def make_align(args, db):
     """ Creates the script for aligning reads """
     script_file = "/{}/{}/Scripts/1_{}_align.sh".format(
@@ -624,6 +677,27 @@ def make_SNV_QC(args, db):
             )
         )
 
+def make_QC_script(args, db):
+    """ Create the script to run QC (FastQC and Trimmomatic)"""
+    script_file = "{}_QC.sh".format(args.name)
+    with open(script_file, "w") as fout:
+        fout.write("#!/bin/bash\n")
+        fout.write("set -e\n")
+        fout.write("##-------------\n")
+        fout.write("## Quality control of FASTQ files")
+        fout.write("##-------------\n")
+        fout.write(
+            "(bash /{}/{}/Scripts/0_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0_{}_fastqc.log\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
+            )
+        )
+        # TODO: Make logic to decide if the next step is necessary
+        fout.write(
+            "(bash /{}/{}/Scripts/0a_{}_trimfastq.sh) 2>&1 | tee /{}/{}/LOG/0a_{}_trimfastqc.log\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
+            )
+        )
+
 
 def make_masterscript(args, db):
     """ Create the master script used for running all the scripts """
@@ -635,11 +709,6 @@ def make_masterscript(args, db):
         fout.write("##{}'s Variant Calling\n".format(args.name))
         fout.write("## Script version: {}\n".format(__version__))
         fout.write("##-------------\n")
-        fout.write(
-            "(bash /{}/{}/Scripts/0_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0_{}_fastqc.log\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
-            )
-        )
         fout.write(
             "(bash /{}/{}/Scripts/1_{}_align.sh) 2>&1 | tee /{}/{}/LOG/1_{}_alignment.log\n".format(
                 db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
@@ -712,12 +781,20 @@ def make_masterscript(args, db):
                 db["out_dir"], args.name, args.name
             )
         )
+        fout.write(
+            "bash /{}/{}/Scripts/10_{}_annotate.sh\n".format(
+                db["out_dir"], args.name, args.name
+            )
+        )
     os.chmod(script_file, 0o777)
 
 
 def make_annotate(args, db):
     """ Create the script for performing annotation on the VCF file """
-    script_file = "{}_annotate.sh".format(args.name)
+    script_file = "/{}/{}/Scripts/10_{}_annotate.sh".format(
+        db["out_dir"], args.name, args.name
+    )
+    #script_file = "{}_annotate.sh".format(args.name)
     with open(script_file, "w") as fout:
         fout.write("#!/bin/bash\n")
         fout.write("# set -e\n")
@@ -728,11 +805,8 @@ def make_annotate(args, db):
         fout.write('echo "1/6 dbSNP Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("annotate ")
         fout.write("/data/{} ".format(db["DBSNP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.vcf ".format(
@@ -746,11 +820,8 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("annotate ")
         fout.write("/data/{} ".format(db["DBSNP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.vcf ".format(
@@ -771,11 +842,8 @@ def make_annotate(args, db):
         fout.write('echo "2/6 dbNSFP Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift dbnsfp ".format()
         )
-        fout.write("dbnsfp ")
         fout.write("-db {} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp1.vcf ".format(
@@ -789,11 +857,8 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift dbnsfp ".format()
         )
-        fout.write("dbnsfp ")
         fout.write("-db {} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp1.vcf ".format(
@@ -814,11 +879,8 @@ def make_annotate(args, db):
         fout.write('echo "3/6 gwasCat Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift gwasCat ".format()
         )
-        fout.write("gwasCat ")
         fout.write("-db {} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp2.vcf ".format(
@@ -832,11 +894,8 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift gwasCat ".format()
         )
-        fout.write("gwasCat ")
         fout.write("-db {} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp2.vcf ".format(
@@ -857,11 +916,8 @@ def make_annotate(args, db):
         fout.write('echo "4/6 PhastCons Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift phastCons ".format()
         )
-        fout.write("phastCons ")
         fout.write("{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp3.vcf ".format(
@@ -875,11 +931,8 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift phastCons ".format()
         )
-        fout.write("phastCons ")
         fout.write("{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp3.vcf ".format(
@@ -902,11 +955,8 @@ def make_annotate(args, db):
         fout.write('echo "5/6 ClinVar Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("annotate ")
         fout.write("{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp4.vcf ".format(
@@ -920,11 +970,8 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("annotate ")
         fout.write("{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp4.vcf ".format(
@@ -945,9 +992,7 @@ def make_annotate(args, db):
         fout.write('echo "6/6 SnpEff Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/snpEff.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpeff ".format()
         )
         fout.write("GRCh38.p7.RefSeq ")
         fout.write(
@@ -962,9 +1007,7 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/snpEff.jar ".format(
-                db["java_mem"]
-            )
+            "docker run --rm -v /:/data snpeff38:v1 snpeff ".format()
         )
         fout.write("GRCh38.p7.RefSeq ")
         fout.write(
@@ -1045,6 +1088,7 @@ def variant_call_pipeline(args):
     do_setup(args, cfg_db)
     print("Generating scripts")
     make_QC(args, cfg_db)
+    make_trimfastq(args, cfg_db)
     make_align(args, cfg_db)
     make_sort(args, cfg_db)
     make_deduplicate(args, cfg_db)
@@ -1054,6 +1098,7 @@ def variant_call_pipeline(args):
     make_call_haplotype(args, cfg_db)
     make_genotype(args, cfg_db)
     make_SNV_QC(args, cfg_db)
+    make_QC_script(args, cfg_db)
     make_masterscript(args, cfg_db)
 
 

@@ -98,7 +98,7 @@ def make_cfg(args):
         fout.write("DBNSFP={}/resources/snpeff_db/dbNSFPv3.5a.txt.gz\n".format(args.name[1:]))
         fout.write(
             "GWASCATALOG={}/resources/snpeff_db/gwas-catalog-associations.tsv\n".format(args.name[1:]))
-        fout.write("PHASTCONS={}/resources/snpeff_db/phastCons100way\n".format(args.name[1:]))
+        fout.write("PHASTCONS={}/resources/snpeff_db/phastCons100way/hg38.100way.phastCons\n".format(args.name[1:]))
         fout.write("CLINVAR={}/resources/snpeff_db/clinvar_20180729.vcf.gz\n".format(args.name[1:]))
 
 def process_fastq(args):

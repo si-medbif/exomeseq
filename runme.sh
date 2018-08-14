@@ -9,7 +9,7 @@ exomeseq/setup.py
 cd resources/hg38bundle
 wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg38/Homo_sapiens_assembly38.*
 docker run --rm -v $PWD:/data biocontainers/bwa bwa index /data/Homo_sapiens_assembly38.fasta.gz
-unzip -c Homo_sapiens_assembly38.fasta.gz > Homo_sapiens_assembly38.fasta
+gunzip -c Homo_sapiens_assembly38.fasta.gz > Homo_sapiens_assembly38.fasta
 wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz*
 wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg38/dbsnp_146.hg38.vcf.gz*
 cd ../snpeff_db

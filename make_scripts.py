@@ -995,7 +995,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpeff ".format()
         )
-        fout.write("GRCh38.p7.RefSeq ")
+        fout.write("{} -t ".format(db["snpeff_dbver"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp5.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -1010,7 +1010,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpeff ".format()
         )
-        fout.write("GRCh38.p7.RefSeq ")
+        fout.write("{} -t ".format(db["snpeff_dbver"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp5.vcf ".format(
                 db["out_dir"], args.name, args.name

@@ -91,7 +91,7 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# SNPEff databases\n")
         fout.write("##################\n")
-        fout.write("snpeff_dir=/home/snpeff/snpEff\n")
+        fout.write("snpeff_dbver=GRCh38.86\n")
         fout.write("DBNSFP={}/resources/snpeff_db/dbNSFPv3.5a.txt.gz\n".format(args.name[1:]))
         fout.write(
             "GWASCATALOG={}/resources/snpeff_db/gwas-catalog-associations.tsv\n".format(args.name[1:]))

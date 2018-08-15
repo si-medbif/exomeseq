@@ -48,7 +48,7 @@ docker pull biocontainers/bwa
 docker pull broadinstitute/picard
 docker pull broadinstitute/gatk3:3.8-1
 docker pull fjukstad/trimmomatic
-# docker build -t "snpeff38:v1" .
+docker build --rm -t "snpeff38:v1" snpeff4.3/.
 
 #####################################
 # SETUP Part4:
@@ -59,16 +59,16 @@ do
     exomeseq/make_scripts.py ${SAMPLE}
 done
 
-############################################
+#################################################
 # ANALYSIS:
 # Run the analysis for each sample:
 # QC,
 # alignment, variant calling, annotation,
-# output-parsing
-############################################
+# output-parsing (after all samples are analysed)
+#################################################
 for SAMPLE in `cat samples.paired.list`;
 do
     ./${SAMPLE}_QC.sh
     ./${SAMPLE}_GATK.sh
-    exomeseq/parsevcf.py
 done
+exomeseq/parsevcf.py

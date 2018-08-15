@@ -4,7 +4,7 @@ Module Docstring
 """
 
 __author__ = "Harald Grove"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __license__ = "MIT"
 
 import argparse
@@ -97,6 +97,15 @@ def make_cfg(args):
             "GWASCATALOG={}/resources/snpeff_db/gwas-catalog-associations.tsv\n".format(args.name[1:]))
         fout.write("PHASTCONS={}/resources/snpeff_db/phastCons100way/hg38.100way.phastCons\n".format(args.name[1:]))
         fout.write("CLINVAR={}/resources/snpeff_db/clinvar_20180729.vcf.gz\n".format(args.name[1:]))
+        fout.write("##################\n")
+        fout.write("# Docker images\n")
+        fout.write("##################\n")
+        fout.write("FASTQC=biocontainers/fastqc\n")
+        fout.write("BWA=biocontainers/bwa\n")
+        fout.write("PICARD=broadinstitute/picard\n")
+        fout.write("GATK=broadinstitute/gatk3:3.8-1\n")
+        fout.write("TRIMMOMATIC=fjukstad/trimmomatic\n")
+        fout.write("SNPEFF=snpeff38:v1\n")
 
 def process_fastq(args):
     file_list = glob.glob("*.*")
@@ -115,7 +124,7 @@ def process_fastq(args):
         for filename in file_list:
             lf = filename.rsplit('.', 3)
             if lf[-1] == 'bed' and count_bed == 1:
-                sys.stdout.write('Found one bed file {}, will use for region file.'.format(filename))
+                sys.stdout.write('Found one bed file {}, will use for region file.\n'.format(filename))
                 args.regions38 = filename
                 continue
             elif len(lf) < 4 or lf[1] not in ['0', '1', '2'] or lf[2] not in ['fastq'] or lf[3] not in ['gz']:
@@ -128,7 +137,7 @@ def process_fastq(args):
                     continue
                 else:
                     sys.stderr.write(
-                        'ERROR: File {} is indicated as one of a pair but the matching file is missing.'.format(filename))
+                        'ERROR: File {} is indicated as one of a pair but the matching file is missing.\n'.format(filename))
                     continue
             if lf[1] in ['0']:
                 if samples[lf[0]] == 1:
@@ -136,7 +145,7 @@ def process_fastq(args):
                     fout1.write('{}\n'.format(lf[0]))
                 else:
                     sys.stderr.write(
-                        'ERROR: File {} is indicated as single, but there is another file with same sample name.'.format(filename))
+                        'ERROR: File {} is indicated as single, but there is another file with same sample name.\n'.format(filename))
                     continue
 
 def main(args):

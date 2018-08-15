@@ -882,7 +882,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift gwasCat ".format()
         )
-        fout.write("-db {} ".format(db["GWASCATALOG"]))
+        fout.write("-db /data/{} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp2.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -897,7 +897,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift gwasCat ".format()
         )
-        fout.write("-db {} ".format(db["GWASCATALOG"]))
+        fout.write("-db /data/{} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp2.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -919,7 +919,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift phastCons ".format()
         )
-        fout.write("{} ".format(db["PHASTCONS"]))
+        fout.write("/data/{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp3.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -934,7 +934,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift phastCons ".format()
         )
-        fout.write("{} ".format(db["PHASTCONS"]))
+        fout.write("/data/{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp3.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -958,7 +958,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("{} ".format(db["CLINVAR"]))
+        fout.write("/data/{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp4.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -973,7 +973,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift annotate ".format()
         )
-        fout.write("{} ".format(db["CLINVAR"]))
+        fout.write("/data/{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp4.vcf ".format(
                 db["out_dir"], args.name, args.name

@@ -119,7 +119,7 @@ def make_trimfastq(args, db):
             fout.write("SE ")
         fout.write("-phred33 ")
         fout.write("-threads {} ".format(db["cores"]))
-        fout.write("-trimlog {}/LOG/0a_{}_trimfastq.log ".format(db["out_dir"],args.name))
+        fout.write("-trimlog /data/{}/{}/LOG/0a_{}_trimfastq.log ".format(db["out_dir"],args.name,args.name))
         if not args.single:
             fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
             fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
@@ -135,14 +135,14 @@ def make_trimfastq(args, db):
         fout.write("SLIDINGWINDOW:4:15 ")
         fout.write("MINLEN:36\n")
         if not args.single:
-            fout.write("mv /data/{}/{}.1.fastq.gz /data/{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /data/{}/{}.2.fastq.gz /data/{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /data/{}/temp_paired.1.fastq.gz /data/{}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], db["fastq_paired_dir"], args.name))
-            fout.write("mv /data/{}/temp_paired.2.fastq.gz /data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"],
+            fout.write("mv /{}/{}.1.fastq.gz /{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv /{}/{}.2.fastq.gz /{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv /{}/temp_paired.1.fastq.gz /{}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], db["fastq_paired_dir"], args.name))
+            fout.write("mv /{}/temp_paired.2.fastq.gz /{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"],
                                                                                             db["fastq_paired_dir"],
                                                                                             args.name)
                        )
-            fout.write("mv /data/{}/temp_unpaired.1.fastq.gz /data/{}/{}.unpaired.1.fastq.gz\n".format(db["fastq_paired_dir"],
+            fout.write("mv /{}/temp_unpaired.1.fastq.gz /{}/{}.unpaired.1.fastq.gz\n".format(db["fastq_paired_dir"],
                                                                                             db["fastq_paired_dir"],
                                                                                             args.name)
                        )
@@ -697,6 +697,7 @@ def make_QC_script(args, db):
                 db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
             )
         )
+    os.chmod(script_file, 0o777)
 
 
 def make_masterscript(args, db):
@@ -844,7 +845,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift dbnsfp ".format()
         )
-        fout.write("-db {} ".format(db["DBNSFP"]))
+        fout.write("-db /data/{} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp1.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -859,7 +860,7 @@ def make_annotate(args, db):
         fout.write(
             "docker run --rm -v /:/data snpeff38:v1 snpsift dbnsfp ".format()
         )
-        fout.write("-db {} ".format(db["DBNSFP"]))
+        fout.write("-db /data/{} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp1.vcf ".format(
                 db["out_dir"], args.name, args.name

@@ -51,10 +51,7 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# Project specific reference files\n")
         fout.write("##################\n")
-        if args.regions38 is not None:
-            fout.write("exon_bed={}\n".format(args.regions38.strip("/")))
-        else:
-            fout.write("exon_bed={}/regions38.bed\n".format(args.name[1:]))
+        fout.write("exon_bed={}/regions38.bed\n".format(args.name[1:]))
         # These are files with SNP allele frequencies, will not be universally applicable
         if args.afdb:
             fout.write("freq_main={}/resources/allelefreqs/1KG/variants_hg38.frq\n".format(args.name[1:]))
@@ -161,9 +158,6 @@ if __name__ == "__main__":
     """ This is executed when run from the command line """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "-r", "--regions38", help="Bed file with hg38 region information (full path)."
-    )
     parser.add_argument("-a", "--afdb", action="store_true", default=False, help="Include allele frequency databases.")
     # Optional verbosity counter (eg. -v, -vv, -vvv, etc.)
     parser.add_argument(

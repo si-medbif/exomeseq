@@ -51,7 +51,7 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# Project specific reference files\n")
         fout.write("##################\n")
-        fout.write("exon_bed={}/regions38.bed\n".format(args.name[1:]))
+        fout.write("exon_bed={}/{}\n".format(args.name[1:],args.regions38))
         # These are files with SNP allele frequencies, will not be universally applicable
         if args.afdb:
             fout.write("freq_main={}/resources/allelefreqs/1KG/variants_hg38.frq\n".format(args.name[1:]))

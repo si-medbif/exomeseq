@@ -651,7 +651,7 @@ def main(args):
     try:
         t = time.time()
         read_samples(args, db)
-        print("{}: {:.3f}s".format(args.samples, time.time() - t))
+        print("Read {} samples: {:.3f}s".format(len(args.samples, time.time() - t))
     except FileNotFoundError:
         db["samples"] = []
     t = time.time()
@@ -673,14 +673,7 @@ def main(args):
     t = time.time()
     do_setup(args, db)
     print("Setup: {:.3f}s".format(time.time() - t))
-    try:
-        t = time.time()
-        print("dbSNP: ",end="")
-        read_dbSNP(args, db)
-        print("{:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["dbsnp"] = {}
-        print("dbSNP database not found.")
+    db["dbsnp"] = {}
     db['dbmutationtaster'] = {}
     db['dbclinvar'] = {}
     db["esp6500"] = {}
@@ -688,6 +681,14 @@ def main(args):
     db["hgvd"] = {}
     db["gonl"] = {}
     if args.reportfile is not None:
+        try:
+            t = time.time()
+            print("dbSNP: ", end="")
+            read_dbSNP(args, db)
+            print("{:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("dbSNP database not found.")
+
         try:
             t = time.time()
             read_mutationtaster(args, db)

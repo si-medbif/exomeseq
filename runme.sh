@@ -71,4 +71,4 @@ do
     ./${SAMPLE}_QC.sh
     ./${SAMPLE}_GATK.sh
 done
-exomeseq/parsevcf.py
+exomeseq/parsevcf.py -o full_report.txt

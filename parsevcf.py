@@ -651,7 +651,7 @@ def main(args):
     try:
         t = time.time()
         read_samples(args, db)
-        print("Read {} samples: {:.3f}s".format(len(args.samples, time.time() - t))
+        print("Read {} samples: {:.3f}s".format(len(args.samples), time.time() - t))
     except FileNotFoundError:
         db["samples"] = []
     t = time.time()

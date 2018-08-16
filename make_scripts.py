@@ -365,7 +365,7 @@ def make_BQSR(args, db):
         fout.write("##Step6-1: Perform Base Recalibration\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
         )
         fout.write("-T BaseRecalibrator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
@@ -407,7 +407,7 @@ def make_BQSR(args, db):
         fout.write("##Step6-4: Print Reads\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
         )
         fout.write("-T PrintReads ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -449,7 +449,7 @@ def make_call_haplotype(args, db):
         fout.write("##Step7: Call Haplotype\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
         )
         fout.write("-T HaplotypeCaller ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))

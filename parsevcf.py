@@ -38,11 +38,12 @@ def read_genes(args, db):
 def read_samples(args, db):
     """ Read a list of samples to include in report """
     db["samples"] = []
-    with open(args.samples, "r") as fin:
-        for line in fin:
-            if line.startswith("#"):
-                continue
-            db["samples"].append(line.strip())
+    for sample_file in args.samples:
+        with open(sample_file, "r") as fin:
+            for line in fin:
+                if line.startswith("#"):
+                    continue
+                db["samples"].append(line.strip())
 
 
 def read_variants(args, db):
@@ -73,7 +74,7 @@ def read_vcfheader(args, db):
     db["header_d"] = {}
     db["header_l"] = []
     db["ANN_header_l"] = []
-    vcf_header_file = "vcf_header.txt"  # TODO: think about how to handle this file
+    vcf_header_file = "exomeseq/vcf_header.txt"  # TODO: think about how to handle this file
     with open(vcf_header_file, "r") as fin:
         for line in fin:
             try:
@@ -314,6 +315,8 @@ def do_setup(args, db):
         )
     with open(args.logfile, "w") as fout:
         fout.write("# Logfile\n")
+    if args.reportfile is None:
+        return
     with open(args.reportfile, "w") as fout:
         fout.write(
             (
@@ -371,9 +374,10 @@ def parse_vcf(args, db, sample, mode):
     except:
         sys.stderr.write("Skipping {} {}, missing files\n".format(sample, mode))
         return
-    with open(vcf_file, "r") as fin, open(args.outfile, "a") as fout, open(
-        args.logfile, "a"
-    ) as flog, open(args.reportfile, "a") as ffreq:
+    if args.reportfile is not None:
+        ffreq = open(args.reportfile, "a")
+    with open(vcf_file, "r") as fin, open(args.outfile, "a") as fout,\
+            open(args.logfile, "a") as flog:
         for line in fin:
             if line.startswith("##"):
                 continue
@@ -552,6 +556,8 @@ def parse_vcf(args, db, sample, mode):
                     val = ANN_info_d.get(col, "NA")
                     fout.write("\t{}".format(val))
                 fout.write("\n")
+            if args.reportfile is None:
+                continue
             # Write variant file for preliminary filtering
             # Fields: (Read-depth, frequency, clinvar-sig,
             ffreq.write(
@@ -645,7 +651,7 @@ def main(args):
     try:
         t = time.time()
         read_samples(args, db)
-        print("{}: {:.3f}s".format(args.samples, time.time() - t))
+        print("Read {} samples: {:.3f}s".format(len(args.samples, time.time() - t))
     except FileNotFoundError:
         db["samples"] = []
     t = time.time()
@@ -667,57 +673,59 @@ def main(args):
     t = time.time()
     do_setup(args, db)
     print("Setup: {:.3f}s".format(time.time() - t))
-    try:
-        t = time.time()
-        print("dbSNP: ",end="")
-        read_dbSNP(args, db)
-        print("{:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["dbsnp"] = {}
-        print("dbSNP database not found.")
-    try:
-        t = time.time()
-        read_mutationtaster(args, db)
-        print("mutationtaster: {:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["dbmutationtaster"] = {}
-        print("Mutationtaster database not found.")
-    try:
-        t = time.time()
-        read_clinvar(args, db)
-        print("ClinVar: {:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["dbclinvar"] = {}
-        print("ClinVar database not found.")
-    try:
-        t = time.time()
-        read_ESP6500(args, db)
-        print("ESP6500: {:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["esp6500"] = {}
-        print("ESP6500 database not found.")
-    try:
-        t = time.time()
-        read_ExAC(args, db)
-        print("ExAc: {:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["exac"] = {}
-        print("ExAc database not found.")
-    try:
-        t = time.time()
-        read_HGVD(args, db)
-        print("HGVD: {:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["hgvd"] = {}
-        print("HGVD database not found.")
-    try:
-        t = time.time()
-        print("GONL: ", end="")
-        read_GONL(args, db)
-        print("{:.3f}s".format(time.time() - t))
-    except FileNotFoundError:
-        db["gonl"] = {}
-        print("GoNL database not found.")
+    db["dbsnp"] = {}
+    db['dbmutationtaster'] = {}
+    db['dbclinvar'] = {}
+    db["esp6500"] = {}
+    db["exac"] = {}
+    db["hgvd"] = {}
+    db["gonl"] = {}
+    if args.reportfile is not None:
+        try:
+            t = time.time()
+            print("dbSNP: ", end="")
+            read_dbSNP(args, db)
+            print("{:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("dbSNP database not found.")
+
+        try:
+            t = time.time()
+            read_mutationtaster(args, db)
+            print("mutationtaster: {:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("Mutationtaster database not found.")
+        try:
+            t = time.time()
+            read_clinvar(args, db)
+            print("ClinVar: {:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("ClinVar database not found.")
+        try:
+            t = time.time()
+            read_ESP6500(args, db)
+            print("ESP6500: {:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("ESP6500 database not found.")
+        try:
+            t = time.time()
+            read_ExAC(args, db)
+            print("ExAc: {:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("ExAc database not found.")
+        try:
+            t = time.time()
+            read_HGVD(args, db)
+            print("HGVD: {:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("HGVD database not found.")
+        try:
+            t = time.time()
+            print("GONL: ", end="")
+            read_GONL(args, db)
+            print("{:.3f}s".format(time.time() - t))
+        except FileNotFoundError:
+            print("GoNL database not found.")
     # read_params(args)
     t = time.time()
     parse_vcfs(args, db)
@@ -757,7 +765,8 @@ if __name__ == "__main__":
         "--samples",
         action="store",
         help="Samples to include in report",
-        default="samples.list",
+        nargs='*',
+        default=["samples.paired.list", "samples.single.list"],
     )
     # parser.add_argument("-i", "--info", action="store", help="List of INFO fields to keep", default="info_fields.txt")
     parser.add_argument(

@@ -109,9 +109,9 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# Trimmomatic settings\n")
         fout.write("##################\n")
-        fout.write("TRIM_window=4")
-        fout.write("TRIM_score=15")
-        fout.write("TRIM_minlen=36")
+        fout.write("TRIM_window=4\n")
+        fout.write("TRIM_score=15\n")
+        fout.write("TRIM_minlen=36\n")
 
 def process_fastq(args):
     file_list = glob.glob("*.*")

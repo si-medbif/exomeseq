@@ -16,7 +16,7 @@ The package consists of python scripts that will
 	3. Prepare the configuration file with links to required reference files.
 	4. Create and run scripts for analysing each sample. 
 
-###Instructions:
+## Instructions:
 
 	1. Create a new project folder and move to this location
 	$ mkdir projectA
@@ -28,13 +28,15 @@ The package consists of python scripts that will
     
     3. Download the pipeline code from GitHub:
     $ git clone https://github.com/si-medbif/exomeseq.git
+
+#### The user can at this step choose one of two paths:
     
-Fully automatic, no trimming of reads 
+##### Fully automatic, no trimming of reads 
       
 	4. Start the command to setup and run the pipeline 
 	$ exomeseq/runme.sh
 	
-Half-automatic, user decides to trim reads or not
+##### Half-automatic, user decides to trim reads or not
 
 	4. Start the command to setup the pipeline 
 	$ exomeseq/runsetup.sh

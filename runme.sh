@@ -2,6 +2,16 @@
 
 set -e
 
+#################################################
+# SETUP Part0:
+# Check if script is run from the exomeseq folder
+# If yes, move to the parent (main project) folder
+##################################################
+folder=${PWD##*/}
+if [ ${folder} = 'exomeseq' ]
+then
+    cd ..
+fi
 ######################################################
 # SETUP Part1:
 # Create folders and configuration file
@@ -38,7 +48,6 @@ wget ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20180729.vcf.gz*
 # GWASCat
 wget ftp://ftp.ebi.ac.uk/pub/databases/gwas/releases/latest/gwas-catalog-associations.tsv
 cd ../..
-
 ##################################
 # SETUP Part3:
 # Download required docker images
@@ -49,7 +58,6 @@ docker pull broadinstitute/picard
 docker pull broadinstitute/gatk3:3.8-1
 docker pull fjukstad/trimmomatic
 docker build --rm -t "snpeff38:v1" snpeff4.3/.
-
 #####################################
 # SETUP Part4:
 # Create runscripts for each sample
@@ -58,7 +66,6 @@ for SAMPLE in `cat samples.paired.list`;
 do
     exomeseq/make_scripts.py ${SAMPLE}
 done
-
 #################################################
 # ANALYSIS:
 # Run the analysis for each sample:
@@ -72,3 +79,4 @@ do
     ./${SAMPLE}_GATK.sh
 done
 exomeseq/parsevcf.py -o full_report.txt
+

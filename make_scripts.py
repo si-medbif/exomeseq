@@ -38,7 +38,8 @@ def do_setup(args, db):
             "BQSR",
             "GVCF",
             "VCF",
-            "FastQC",
+            "FastQC_pre",
+            "FastQC_post",
             "QC",
             "QC/FILTERED",
             "Report",
@@ -51,8 +52,8 @@ def do_setup(args, db):
         # sys.exit(1)
 
 
-def make_QC(args, db):
-    """ Creates the script for running FastQC """
+def make_preQC(args, db):
+    """ Creates the script for running FastQC after setup but before any other processing"""
     script_file = "/{}/{}/Scripts/0_{}_fastqc.sh".format(
         db["out_dir"], args.name, args.name
     )
@@ -60,26 +61,26 @@ def make_QC(args, db):
         fout.write("#!/bin/bash\n")
         fout.write("set -e\n")
         fout.write("##-------------\n")
-        fout.write("##Step0: FastQC\n")
+        fout.write("##Step0: FastQC on raw data\n")
         fout.write("##-------------\n")
         fout.write("docker run --rm -v /:/data {} fastqc ".format(db["FASTQC"]))
-        fout.write("-o /data/{}/{}/FastQC ".format(db["out_dir"], args.name, args.name))
+        fout.write("-o /data/{}/{}/FastQC_pre ".format(db["out_dir"], args.name, args.name))
         fout.write("-t 2 ")
         if not args.single:
             fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
             fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name))
             fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
+                "unzip -j -d /{}/{}/FastQC_pre/{}.1_fastqc /{}/{}/FastQC_pre/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
                 )
             )
             fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
+                "unzip -j -d /{}/{}/FastQC_pre/{}.2_fastqc /{}/{}/FastQC_pre/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
                 )
             )
             fout.write("# Check FastQC output files\n")
-            fout.write("python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+            fout.write("python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_pre_report.txt /{}/{}/FastQC_pre/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC_pre/{}.2_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], db["out_dir"], args.name,
                     db["out_dir"], args.name, args.name,
                     db["out_dir"], args.name, args.name
@@ -88,21 +89,73 @@ def make_QC(args, db):
         else:
             fout.write("/data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name))
             fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.0_fastqc /{}/{}/FastQC/{}.0_fastqc.zip {}.0_fastqc/fastqc_data.txt\n".format(
+                "unzip -j -d /{}/{}/FastQC_pre/{}.0_fastqc /{}/{}/FastQC_pre/{}.0_fastqc.zip {}.0_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
                 )
             )
             fout.write("# Check FastQC output files\n")
             fout.write(
-                "python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.0_fastqc/fastqc_data.txt\n".format(
+                "python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_pre_report.txt /{}/{}/FastQC_pre/{}.0_fastqc/fastqc_data.txt\n".format(
                     db["out_dir"], db["out_dir"], args.name,
                     db["out_dir"], args.name, args.name,
                     db["out_dir"], args.name, args.name
                 )
             )
 
+
+def make_postQC(args, db):
+    """ Creates the script for running FastQC after optional Trimmomatic"""
+    script_file = "/{}/{}/Scripts/0b_{}_fastqc.sh".format(
+        db["out_dir"], args.name, args.name
+    )
+    with open(script_file, "w") as fout:
+        fout.write("#!/bin/bash\n")
+        fout.write("set -e\n")
+        fout.write("##-------------\n")
+        fout.write("##Step0b: FastQC on cleaned data\n")
+        fout.write("##-------------\n")
+        fout.write("docker run --rm -v /:/data {} fastqc ".format(db["FASTQC"]))
+        fout.write("-o /data/{}/{}/FastQC_post ".format(db["out_dir"], args.name, args.name))
+        fout.write("-t 2 ")
+        if not args.single:
+            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
+            fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name))
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC_post/{}.1_fastqc /{}/{}/FastQC_post/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
+            )
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC_post/{}.2_fastqc /{}/{}/FastQC_post/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
+            )
+            fout.write("# Check FastQC output files\n")
+            fout.write("python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_post_report.txt /{}/{}/FastQC_post/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC_post/{}.2_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], db["out_dir"], args.name,
+                    db["out_dir"], args.name, args.name,
+                    db["out_dir"], args.name, args.name
+                )
+            )
+        else:
+            fout.write("/data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name))
+            fout.write(
+                "unzip -j -d /{}/{}/FastQC_post/{}.0_fastqc /{}/{}/FastQC_post/{}.0_fastqc.zip {}.0_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
+                )
+            )
+            fout.write("# Check FastQC output files\n")
+            fout.write(
+                "python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_post_report.txt /{}/{}/FastQC_post/{}.0_fastqc/fastqc_data.txt\n".format(
+                    db["out_dir"], db["out_dir"], args.name,
+                    db["out_dir"], args.name, args.name,
+                    db["out_dir"], args.name, args.name
+                )
+            )
+
+
 def make_trimfastq(args, db):
-    """ Creates the script for running FastQC """
+    """ Creates the script for running Trimmomatic """
     script_file = "/{}/{}/Scripts/0a_{}_trimfastq.sh".format(
         db["out_dir"], args.name, args.name
     )
@@ -132,8 +185,8 @@ def make_trimfastq(args, db):
             fout.write("/data/{}/{}_single.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
         fout.write("LEADING:3 ")
         fout.write("TRAILING:3 ")
-        fout.write("SLIDINGWINDOW:4:15 ")
-        fout.write("MINLEN:36\n")
+        fout.write("SLIDINGWINDOW:{}:{} ".format(db["TRIM_window"], db["TRIM_score"]))
+        fout.write("MINLEN:{}\n".format(db["TRIM_minlen"]))
         if not args.single:
             fout.write("mv /{}/{}.1.fastq.gz /{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
             fout.write("mv /{}/{}.2.fastq.gz /{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
@@ -142,17 +195,9 @@ def make_trimfastq(args, db):
                                                                                             db["fastq_paired_dir"],
                                                                                             args.name)
                        )
-            fout.write("mv /{}/{}_unpaired.1.fastq.gz /{}/{}.unpaired.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
-                                                                                            db["fastq_paired_dir"],
-                                                                                            args.name)
-                       )
-            fout.write("mv /data/{}/{}_unpaired.2.fastq.gz /data/{}/{}.unpaired.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
-                                                                                            db["fastq_paired_dir"],
-                                                                                            args.name)
-                       )
         else:
-            fout.write("mv /data/{}/{}.0.fastq.gz /data/{}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
-            fout.write("mv /data/{}/{}_single.0.fastq.gz /data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
+            fout.write("mv /{}/{}.0.fastq.gz /{}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
+            fout.write("mv /{}/{}_single.0.fastq.gz /{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
 
 def make_align(args, db):
     """ Creates the script for aligning reads """
@@ -679,7 +724,7 @@ def make_SNV_QC(args, db):
 
 def make_QC_script(args, db):
     """ Create the script to run QC (FastQC and Trimmomatic)"""
-    script_file = "{}_QC.sh".format(args.name)
+    script_file = "/{}/{}/Scripts/{}_doQC.sh".format(db["out_dir"], args.name, args.name)
     with open(script_file, "w") as fout:
         fout.write("#!/bin/bash\n")
         fout.write("set -e\n")
@@ -687,13 +732,12 @@ def make_QC_script(args, db):
         fout.write("## Quality control of FASTQ files")
         fout.write("##-------------\n")
         fout.write(
-            "(bash /{}/{}/Scripts/0_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0_{}_fastqc.log\n".format(
+            "(bash /{}/{}/Scripts/0a_{}_trimfastq.sh) 2>&1 | tee /{}/{}/LOG/0a_{}_trimfastqc.log\n".format(
                 db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
             )
         )
-        # TODO: Make logic to decide if the next step is necessary
         fout.write(
-            "(bash /{}/{}/Scripts/0a_{}_trimfastq.sh) 2>&1 | tee /{}/{}/LOG/0a_{}_trimfastqc.log\n".format(
+            "(bash /{}/{}/Scripts/0b_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0b_{}_fastqc.log\n".format(
                 db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
             )
         )
@@ -702,7 +746,7 @@ def make_QC_script(args, db):
 
 def make_masterscript(args, db):
     """ Create the master script used for running all the scripts """
-    script_file = "{}_GATK.sh".format(args.name)
+    script_file = "/{}/{}/Scripts/{}_GATK.sh".format(db["out_dir"], args.name, args.name)
     with open(script_file, "w") as fout:
         fout.write("#!/bin/bash\n")
         fout.write("set -e\n")
@@ -770,8 +814,6 @@ def make_masterscript(args, db):
                 db["out_dir"], args.name, args.name
             )
         )
-
-        # TODO: These two commands should be optional based on a runtime parameter
         fout.write(
             "bash /{}/{}/Scripts/8_{}_genotype_gvcf.sh\n".format(
                 db["out_dir"], args.name, args.name
@@ -1088,7 +1130,8 @@ def variant_call_pipeline(args):
     print("Creating folder structure")
     do_setup(args, cfg_db)
     print("Generating scripts")
-    make_QC(args, cfg_db)
+    make_preQC(args, cfg_db)
+    make_postQC(args, cfg_db)
     make_trimfastq(args, cfg_db)
     make_align(args, cfg_db)
     make_sort(args, cfg_db)

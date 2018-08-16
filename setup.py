@@ -106,6 +106,12 @@ def make_cfg(args):
         fout.write("GATK=broadinstitute/gatk3:3.8-1\n")
         fout.write("TRIMMOMATIC=fjukstad/trimmomatic\n")
         fout.write("SNPEFF=snpeff38:v1\n")
+        fout.write("##################\n")
+        fout.write("# Trimmomatic settings\n")
+        fout.write("##################\n")
+        fout.write("TRIM_window=4")
+        fout.write("TRIM_score=15")
+        fout.write("TRIM_minlen=36")
 
 def process_fastq(args):
     file_list = glob.glob("*.*")

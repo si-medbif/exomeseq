@@ -65,6 +65,7 @@ docker build --rm -t "snpeff38:v1" snpeff4.3/.
 for SAMPLE in `cat samples.paired.list`;
 do
     exomeseq/make_scripts.py ${SAMPLE}
+    sh ${SAMPLE}/Scripts/0_${SAMPLE}_fastqc.sh
 done
 #################################################
 # ANALYSIS:
@@ -73,10 +74,9 @@ done
 # alignment, variant calling, annotation,
 # output-parsing (after all samples are analysed)
 #################################################
-for SAMPLE in `cat samples.paired.list`;
+for SAMPLE in `cat samples.paired.list samples.single.list`;
 do
-    ./${SAMPLE}_QC.sh
-    ./${SAMPLE}_GATK.sh
+    ${SAMPLE}/Scripts/${SAMPLE}_GATK.sh
 done
 exomeseq/parsevcf.py -o full_report.txt
 

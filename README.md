@@ -1,36 +1,39 @@
 # Exomeseq
 Analysing sequence data from whole exome sequencing or targeted gene panel sequencing.
 
-## Requirements
-    * Ubuntu, or any other compatible OS
-    * Python 3
-    * Docker
-    * Git
-    
-## Setup
-
 The package consists of python scripts that will
 
-	1. Create all required folders and configuration files.
-	2. Move any provided FASTQ files to their appropriate location.
-	3. Prepare the configuration file with links to required reference files.
-	4. Create and run scripts for analysing each sample. 
+	1. Create a new folder based on the provided project name and parent folder.
+	2. Prepare the configuration file with (dummy) links to required reference files.
+	3. Copy/create any other files needed for the project into the target folder.
 
 Instructions:
 
-	1. Create a new project folder and move to this location
-	$ mkdir projectA
-	$ cd projectA
+	1. Run setup.py. If the project folder already exists, setup.py will exit with an error message.
+	$ ./setup.py <full-path-to-project-folder>  
 	 
-    2. Copy all fastq files to the current folder. The name of the fastq files have to follow the following pattern: <sample_name>.1.fastq.gz
-    $ cp <fastq_file1/2> <sample_name>.1.fastq.gz
-    $ cp <fastq_file2/2> <sample_name>.2.fastq.gz
-    
-    3. Download the pipeline code from GitHub:
-    $ git clone https://github.com/si-medbif/exomeseq.git
+    1.1 Navigate to the newly created project folder
+    $ cd <full-path-to-project-folder>  
+     
+    2. Place the fastq files in the fastq folder. The name of the fastq files have to follow the following pattern: <sample_name>.1.fastq.gz
+    $ cp <fastq_file1/2> fastq/<sample_name>.1.fastq.gz
+    $ cp <fastq_file2/2> fastq/<sample_name>.2.fastq.gz  
       
-	4. Start the command to setup and run the pipeline 
-	$ exomeseq/runme.sh
+	2. [Optional] Add gene names to the file "genes.list" if there is a specific list of genes that should be included in the final report.
+	  
+	3. Add sample names (i.e. <sample_name>) to the file "samples.list".
 	 
-    5. The combined report will be in the current folder when finished.
+	4. Open the exome.cfg file and change the <CHANGEME> tag so the paths to the reference files are correct.
+	   
+	5. Run make_scripts.py. Use '-e' to specify if this is an exome data set.
+	$ ./make_scripts.py -e <sample_name>  
+	 
+    6. Start analysis with:
+    $ ./<sample_name>_GATK.sh
+     
+    7. Start annotation with:
+    $ ./<sample_name>_annotation.sh
+    
+    8. Produce summarized report files with:
+    $ ./parsevcf.py
     

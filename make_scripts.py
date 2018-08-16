@@ -4,7 +4,7 @@ Module Docstring
 """
 
 __author__ = "Harald Grove"
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 __license__ = "MIT"
 
 import argparse
@@ -20,7 +20,7 @@ def read_config(args):
                 continue
             key, value = line.strip().split("=")
             db[key] = value
-        if "exon_bed" in db and db["exon_bed"] != "NA":
+        if "exon_bed" in db:
             db["bed_argument"] = "-L /data/{}".format(db["exon_bed"])
     return db
 
@@ -62,97 +62,29 @@ def make_QC(args, db):
         fout.write("##-------------\n")
         fout.write("##Step0: FastQC\n")
         fout.write("##-------------\n")
-        fout.write("docker run --rm -v /:/data {} fastqc ".format(db["FASTQC"]))
+        fout.write("docker run --rm -v /:/data biocontainers/fastqc fastqc ")
         fout.write("-o /data/{}/{}/FastQC ".format(db["out_dir"], args.name, args.name))
         fout.write("-t 2 ")
-        if not args.single:
-            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name))
-            fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
-                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
-                )
+        fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
+        fout.write("/data/{}/{}.2.fastq.gz\n".format(db["fastq_dir"], args.name))
+        fout.write(
+            "unzip -j -d /{}/{}/FastQC/{}.1_fastqc /{}/{}/FastQC/{}.1_fastqc.zip {}.1_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
             )
-            fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
-                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
-                )
+        )
+        fout.write(
+            "unzip -j -d /{}/{}/FastQC/{}.2_fastqc /{}/{}/FastQC/{}.2_fastqc.zip {}.2_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
             )
-            fout.write("# Check FastQC output files\n")
-            fout.write("python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
-                    db["out_dir"], db["out_dir"], args.name,
-                    db["out_dir"], args.name, args.name,
-                    db["out_dir"], args.name, args.name
-                )
+        )
+        fout.write("# Check FastQC output files\n")
+        fout.write("python /{}/collect_fastqc_data.py -o /{}/fastqc_report.txt /{}/{}/FastQC/{}.1_fastqc/fastqc_data.txt /{}/{}/FastQC/{}.2_fastqc/fastqc_data.txt\n".format(
+                db["out_dir"], db["out_dir"],
+                db["out_dir"], args.name, args.name,
+                db["out_dir"], args.name, args.name
             )
-        else:
-            fout.write("/data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name))
-            fout.write(
-                "unzip -j -d /{}/{}/FastQC/{}.0_fastqc /{}/{}/FastQC/{}.0_fastqc.zip {}.0_fastqc/fastqc_data.txt\n".format(
-                    db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name, args.name
-                )
-            )
-            fout.write("# Check FastQC output files\n")
-            fout.write(
-                "python /{}/exomeseq/collect_fastqc_data.py -o /{}/{}/Report/fastqc_report.txt /{}/{}/FastQC/{}.0_fastqc/fastqc_data.txt\n".format(
-                    db["out_dir"], db["out_dir"], args.name,
-                    db["out_dir"], args.name, args.name,
-                    db["out_dir"], args.name, args.name
-                )
-            )
+        )
 
-def make_trimfastq(args, db):
-    """ Creates the script for running FastQC """
-    script_file = "/{}/{}/Scripts/0a_{}_trimfastq.sh".format(
-        db["out_dir"], args.name, args.name
-    )
-    with open(script_file, "w") as fout:
-        fout.write("#!/bin/bash\n")
-        fout.write("set -e\n")
-        fout.write("##-------------\n")
-        fout.write("##Step0a: Trimmomatic\n")
-        fout.write("##-------------\n")
-        fout.write("docker run --rm -v /:/data {} ".format(db["TRIMMOMATIC"]))
-        if not args.single:
-            fout.write("PE ")
-        else:
-            fout.write("SE ")
-        fout.write("-phred33 ")
-        fout.write("-threads {} ".format(db["cores"]))
-        fout.write("-trimlog /data/{}/{}/LOG/0a_{}_trimfastq.log ".format(db["out_dir"],args.name,args.name))
-        if not args.single:
-            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}_paired.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}_unpaired.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}_paired.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}_unpaired.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-        else:
-            fout.write("/data/{}/{}.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
-            fout.write("/data/{}/{}_single.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
-        fout.write("LEADING:3 ")
-        fout.write("TRAILING:3 ")
-        fout.write("SLIDINGWINDOW:4:15 ")
-        fout.write("MINLEN:36\n")
-        if not args.single:
-            fout.write("mv /{}/{}.1.fastq.gz /{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}.2.fastq.gz /{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}_paired.1.fastq.gz /{}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}_paired.2.fastq.gz /{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
-                                                                                            db["fastq_paired_dir"],
-                                                                                            args.name)
-                       )
-            fout.write("mv /{}/{}_unpaired.1.fastq.gz /{}/{}.unpaired.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
-                                                                                            db["fastq_paired_dir"],
-                                                                                            args.name)
-                       )
-            fout.write("mv /data/{}/{}_unpaired.2.fastq.gz /data/{}/{}.unpaired.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
-                                                                                            db["fastq_paired_dir"],
-                                                                                            args.name)
-                       )
-        else:
-            fout.write("mv /data/{}/{}.0.fastq.gz /data/{}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
-            fout.write("mv /data/{}/{}_single.0.fastq.gz /data/{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
 
 def make_align(args, db):
     """ Creates the script for aligning reads """
@@ -165,7 +97,7 @@ def make_align(args, db):
         fout.write("##-------------\n")
         fout.write("##Step1: Align\n")
         fout.write("##-------------\n")
-        fout.write("docker run --rm -v /:/data {} bwa mem ".format(db["BWA"]))
+        fout.write("docker run --rm -v /:/data biocontainers/bwa bwa mem ")
         fout.write("-t {} ".format(db["cores"]))
         fout.write(
             '-R "@RG\\tID:DM_{}\\tSM:{}\\tPL:Illumina\\tLB:WES\\tPU:unit1" '.format(
@@ -173,11 +105,8 @@ def make_align(args, db):
             )
         )
         fout.write("/data/{}.gz ".format(db["ref_genome"]))
-        if not args.single:
-            fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-            fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_paired_dir"], args.name))
-        else:
-            fout.write("/data/{}/{}.0.fastq.gz ".format(db["fastq_single_dir"], args.name))
+        fout.write("/data/{}/{}.1.fastq.gz ".format(db["fastq_dir"], args.name))
+        fout.write("/data/{}/{}.2.fastq.gz ".format(db["fastq_dir"], args.name))
         fout.write(
             "> /{}/{}/SAM/{}_aligned.sam\n".format(db["out_dir"], args.name, args.name)
         )
@@ -195,7 +124,7 @@ def make_sort(args, db):
         fout.write("##Step2: Sort\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} ".format(db["PICARD"])
+            "docker run --rm -v /:/data broadinstitute/picard "
         )
         fout.write("SortSam ")
         fout.write(
@@ -221,10 +150,10 @@ def make_deduplicate(args, db):
         fout.write("#!/bin/bash\n")
         fout.write("set -e\n")
         fout.write("##-------------\n")
-        fout.write("##Step3: Mark duplicates\n")
+        fout.write("##Step2: Mark duplicates\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} ".format(db["PICARD"])
+            "docker run --rm -v /:/data broadinstitute/picard "
         )
         fout.write("MarkDuplicates ")
         fout.write(
@@ -238,7 +167,7 @@ def make_deduplicate(args, db):
             )
         )
         fout.write(
-            "METRICS_FILE=/data/{}/{}/BAM/{}_deduplication_metrics.txt ".format(
+            "METRICS_FILE=/data/{}/{}/BAM/{}_deduplication_metrics.bam ".format(
                 db["out_dir"], args.name, args.name
             )
         )
@@ -260,7 +189,7 @@ def make_index(args, db):
         fout.write("##-------------\n")
         fout.write("##Step4: Build Index\n")
         fout.write(
-            "docker run --rm -v /:/data {} ".format(db["PICARD"])
+            "docker run --rm -v /:/data broadinstitute/picard "
         )
         fout.write("BuildBamIndex ")
         fout.write(
@@ -282,19 +211,13 @@ def make_realign(args, db):
         fout.write("##Step5-1: Create aligner target\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T RealignerTargetCreator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
-        try:
-            fout.write("-known /data/{} ".format(db["indel_1"]))
-        except KeyError:
-            pass
-        try:
-            fout.write("-known /data/{} ".format(db["indel_2"]))
-        except KeyError:
-            pass
+        fout.write("-known /data/{} ".format(db["indel_1"]))
+        fout.write("-known /data/{} ".format(db["indel_2"]))
         fout.write("{} ".format(db["bed_argument"]))
         fout.write(
             "-I /data/{}/{}/BAM/{}_deduplicated.bam ".format(
@@ -318,7 +241,7 @@ def make_realign(args, db):
         fout.write("##Step5-2: Realign indels\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T IndelRealigner ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -333,14 +256,8 @@ def make_realign(args, db):
                 db["out_dir"], args.name, args.name
             )
         )
-        try:
-            fout.write("-known /data/{} ".format(db["indel_1"]))
-        except KeyError:
-            pass
-        try:
-            fout.write("-known /data/{} ".format(db["indel_2"]))
-        except KeyError:
-            pass
+        fout.write("-known /data/{} ".format(db["indel_1"]))
+        fout.write("-known /data/{} ".format(db["indel_2"]))
         fout.write("-dt NONE ")
         fout.write(
             "-o /data/{}/{}/BAM/{}_realigned.bam ".format(
@@ -365,23 +282,14 @@ def make_BQSR(args, db):
         fout.write("##Step6-1: Perform Base Recalibration\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T BaseRecalibrator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
-        try:
-            fout.write("-knownSites /data/{} ".format(db["indel_1"]))
-        except KeyError:
-            pass
-        try:
-            fout.write("-knownSites /data/{} ".format(db["indel_2"]))
-        except KeyError:
-            pass
-        try:
-            fout.write("-knownSites /data/{} ".format(db["DBSNP"]))
-        except KeyError:
-            pass
+        fout.write("-knownSites /data/{} ".format(db["indel_1"]))
+        fout.write("-knownSites /data/{} ".format(db["indel_2"]))
+        fout.write("-knownSites /data/{} ".format(db["DBSNP"]))
         fout.write("{} ".format(db["bed_argument"]))
         fout.write("--interval_padding 100 ")
         fout.write(
@@ -407,7 +315,7 @@ def make_BQSR(args, db):
         fout.write("##Step6-4: Print Reads\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T PrintReads ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -449,7 +357,7 @@ def make_call_haplotype(args, db):
         fout.write("##Step7: Call Haplotype\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"]
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T HaplotypeCaller ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -489,7 +397,7 @@ def make_genotype(args, db):
         fout.write("##Step8: Genotype\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T GenotypeGVCFs ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -510,7 +418,7 @@ def make_genotype(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T VariantAnnotator ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -562,7 +470,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-1-1: Extract SNPs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T SelectVariants ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -590,7 +498,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-1-2: Filter SNPs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T VariantFiltration ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -620,7 +528,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-2-1: Extract INDELs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T SelectVariants ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -651,7 +559,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-2-2: Filter INDELs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /:/data {} java -jar GenomeAnalysisTK.jar ".format(db["GATK"])
+            "docker run --rm -v /:/data broadinstitute/gatk3:3.8-1 java -jar GenomeAnalysisTK.jar "
         )
         fout.write("-T VariantFiltration ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -677,28 +585,6 @@ def make_SNV_QC(args, db):
             )
         )
 
-def make_QC_script(args, db):
-    """ Create the script to run QC (FastQC and Trimmomatic)"""
-    script_file = "{}_QC.sh".format(args.name)
-    with open(script_file, "w") as fout:
-        fout.write("#!/bin/bash\n")
-        fout.write("set -e\n")
-        fout.write("##-------------\n")
-        fout.write("## Quality control of FASTQ files")
-        fout.write("##-------------\n")
-        fout.write(
-            "(bash /{}/{}/Scripts/0_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0_{}_fastqc.log\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
-            )
-        )
-        # TODO: Make logic to decide if the next step is necessary
-        fout.write(
-            "(bash /{}/{}/Scripts/0a_{}_trimfastq.sh) 2>&1 | tee /{}/{}/LOG/0a_{}_trimfastqc.log\n".format(
-                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
-            )
-        )
-    os.chmod(script_file, 0o777)
-
 
 def make_masterscript(args, db):
     """ Create the master script used for running all the scripts """
@@ -710,6 +596,11 @@ def make_masterscript(args, db):
         fout.write("##{}'s Variant Calling\n".format(args.name))
         fout.write("## Script version: {}\n".format(__version__))
         fout.write("##-------------\n")
+        fout.write(
+            "(bash /{}/{}/Scripts/0_{}_fastqc.sh) 2>&1 | tee /{}/{}/LOG/0_{}_fastqc.log\n".format(
+                db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
+            )
+        )
         fout.write(
             "(bash /{}/{}/Scripts/1_{}_align.sh) 2>&1 | tee /{}/{}/LOG/1_{}_alignment.log\n".format(
                 db["out_dir"], args.name, args.name, db["out_dir"], args.name, args.name
@@ -782,20 +673,12 @@ def make_masterscript(args, db):
                 db["out_dir"], args.name, args.name
             )
         )
-        fout.write(
-            "bash /{}/{}/Scripts/10_{}_annotate.sh\n".format(
-                db["out_dir"], args.name, args.name
-            )
-        )
     os.chmod(script_file, 0o777)
 
 
 def make_annotate(args, db):
     """ Create the script for performing annotation on the VCF file """
-    script_file = "/{}/{}/Scripts/10_{}_annotate.sh".format(
-        db["out_dir"], args.name, args.name
-    )
-    #script_file = "{}_annotate.sh".format(args.name)
+    script_file = "{}_annotate.sh".format(args.name)
     with open(script_file, "w") as fout:
         fout.write("#!/bin/bash\n")
         fout.write("# set -e\n")
@@ -806,8 +689,11 @@ def make_annotate(args, db):
         fout.write('echo "1/6 dbSNP Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift annotate ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
+        fout.write("annotate ")
         fout.write("/data/{} ".format(db["DBSNP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.vcf ".format(
@@ -821,8 +707,11 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift annotate ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
+        fout.write("annotate ")
         fout.write("/data/{} ".format(db["DBSNP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.vcf ".format(
@@ -843,9 +732,12 @@ def make_annotate(args, db):
         fout.write('echo "2/6 dbNSFP Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift dbnsfp ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("-db /data/{} ".format(db["DBNSFP"]))
+        fout.write("dbnsfp ")
+        fout.write("-db {} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp1.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -858,9 +750,12 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift dbnsfp ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("-db /data/{} ".format(db["DBNSFP"]))
+        fout.write("dbnsfp ")
+        fout.write("-db {} ".format(db["DBNSFP"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp1.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -880,9 +775,12 @@ def make_annotate(args, db):
         fout.write('echo "3/6 gwasCat Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift gwasCat ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("-db /data/{} ".format(db["GWASCATALOG"]))
+        fout.write("gwasCat ")
+        fout.write("-db {} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp2.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -895,9 +793,12 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift gwasCat ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("-db /data/{} ".format(db["GWASCATALOG"]))
+        fout.write("gwasCat ")
+        fout.write("-db {} ".format(db["GWASCATALOG"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp2.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -917,9 +818,12 @@ def make_annotate(args, db):
         fout.write('echo "4/6 PhastCons Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift phastCons ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("/data/{} ".format(db["PHASTCONS"]))
+        fout.write("phastCons ")
+        fout.write("{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp3.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -932,9 +836,12 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift phastCons ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("/data/{} ".format(db["PHASTCONS"]))
+        fout.write("phastCons ")
+        fout.write("{} ".format(db["PHASTCONS"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp3.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -956,9 +863,12 @@ def make_annotate(args, db):
         fout.write('echo "5/6 ClinVar Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift annotate ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("/data/{} ".format(db["CLINVAR"]))
+        fout.write("annotate ")
+        fout.write("{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp4.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -971,9 +881,12 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpsift annotate ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/SnpSift.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("/data/{} ".format(db["CLINVAR"]))
+        fout.write("annotate ")
+        fout.write("{} ".format(db["CLINVAR"]))
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp4.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -993,9 +906,11 @@ def make_annotate(args, db):
         fout.write('echo "6/6 SnpEff Annotation Started"\n')
         fout.write("START_TIME=$SECONDS\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpeff ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/snpEff.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("{} -t ".format(db["snpeff_dbver"]))
+        fout.write("GRCh38.p7.RefSeq ")
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_SNV.temp5.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -1008,9 +923,11 @@ def make_annotate(args, db):
         )
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /:/data {} snpeff ".format(db["SNPEFF"])
+            "docker run --rm --user snpeff -v /:/data haraldgrove/snpeff:v4 java -Xmx{} -jar /home/snpeff/snpEff/snpEff.jar ".format(
+                db["java_mem"]
+            )
         )
-        fout.write("{} -t ".format(db["snpeff_dbver"]))
+        fout.write("GRCh38.p7.RefSeq ")
         fout.write(
             "/data/{}/{}/VCF/{}_FILTERED_INDEL.temp5.vcf ".format(
                 db["out_dir"], args.name, args.name
@@ -1089,7 +1006,6 @@ def variant_call_pipeline(args):
     do_setup(args, cfg_db)
     print("Generating scripts")
     make_QC(args, cfg_db)
-    make_trimfastq(args, cfg_db)
     make_align(args, cfg_db)
     make_sort(args, cfg_db)
     make_deduplicate(args, cfg_db)
@@ -1099,7 +1015,6 @@ def variant_call_pipeline(args):
     make_call_haplotype(args, cfg_db)
     make_genotype(args, cfg_db)
     make_SNV_QC(args, cfg_db)
-    make_QC_script(args, cfg_db)
     make_masterscript(args, cfg_db)
 
 
@@ -1122,10 +1037,10 @@ if __name__ == "__main__":
         "name", action="store", help="Sample name (everything before '.1.fastq.gz')"
     )
 
-    # Dependant on the user providing a region bed-file. Optional argument flag which defaults to True
-    #parser.add_argument(
-    #    "-e", "--exome", action="store_false", default=True, help="If not using Exome data"
-    #)
+    # Optional argument flag which defaults to False
+    parser.add_argument(
+        "-e", "--exome", action="store_true", default=False, help="Exome data"
+    )
     parser.add_argument(
         "-r",
         "--replacement",
@@ -1136,7 +1051,6 @@ if __name__ == "__main__":
 
     # Optional argument which requires a parameter (eg. -d test)
     parser.add_argument("-c", "--config", action="store", default="exome.cfg")
-    parser.add_argument("-s", "--single", action="store_true", default=False, help="If single end reads")
 
     # Optional verbosity counter (eg. -v, -vv, -vvv, etc.)
     parser.add_argument(

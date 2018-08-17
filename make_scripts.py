@@ -22,6 +22,8 @@ def read_config(args):
             db[key] = value
         if "exon_bed" in db and not db["exon_bed"].endswith('NA'):
             db["bed_argument"] = "-L /data/{}".format(db["exon_bed"])
+        else:
+            db["bed_argument"] = ""
     return db
 
 

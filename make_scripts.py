@@ -20,7 +20,7 @@ def read_config(args):
                 continue
             key, value = line.strip().split("=")
             db[key] = value
-        if "exon_bed" in db and db["exon_bed"] != "NA":
+        if "exon_bed" in db and db["exon_bed"].endswith('NA'):
             db["bed_argument"] = "-L /data/{}".format(db["exon_bed"])
     return db
 

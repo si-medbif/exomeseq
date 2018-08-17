@@ -114,9 +114,13 @@ def make_cfg(args):
         fout.write("TRIM_minlen=36\n")
 
 def process_fastq(args):
+    """ Collects fastq files and moves them to either pared or single folder
+        Also looks for a single bed file specifying the target regions
+    """
     file_list = glob.glob("*.*")
     samples = {}
     count_bed = 0
+    args.regions38 = 'NA'
     for filename in file_list:
         lf = filename.rsplit('.',3)
         if lf[-1] == 'bed':

@@ -45,45 +45,29 @@ def make_cfg(args):
         fout.write("##################\n")
         fout.write("# Folders containing input and output files\n")
         fout.write("##################\n")
-        fout.write("fastq_paired_dir={}/fastq_paired\n".format(args.name[1:]))
-        fout.write("fastq_single_dir={}/fastq_single\n".format(args.name[1:]))
         fout.write("out_dir={}\n".format(args.name[1:]))
+        fout.write("fastq_paired_dir=fastq_paired\n")
+        fout.write("fastq_single_dir=fastq_single\n")
         fout.write("##################\n")
         fout.write("# Project specific reference files\n")
         fout.write("##################\n")
-        if args.regions38 != 'NA':
-            fout.write("exon_bed={}/{}\n".format(args.name[1:],args.regions38))
-        else:
-            fout.write("exon_bed={}\n".format(args.regions38))
+        fout.write("exon_bed={}\n".format(args.regions38))
         # These are files with SNP allele frequencies, will not be universally applicable
         if args.afdb:
-            fout.write("freq_main={}/resources/allelefreqs/1KG/variants_hg38.frq\n".format(args.name[1:]))
-            fout.write(
-                "exac_freqfile={}/resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n".format(args.name[1:])
-            )
-            fout.write("hgvd_freqfile={}/resources/allelefreqs/HGVD/HGVD_freq.txt\n".format(args.name[1:]))
-            fout.write(
-                "esp6500_freqfile={}/resources/allelefreqs/ESP6500/ESP6500_freq.txt\n".format(args.name[1:])
-            )
-            fout.write("gonl_freqfile={}/resources/allelefreqs/GoNL/gonl_freq.txt\n".format(args.name[1:]))
-            fout.write("clinvar_freq={}/resources/allelefreqs/clinvar/clinvar.vcf\n".format(args.name[1:]))
-            fout.write(
-                "mutationtaster={}/resources/allelefreqs/mutationtaster/mutationtaster.list\n".format(args.name[1:])
-            )
+            fout.write("freq_main=resources/allelefreqs/1KG/variants_hg38.frq\n")
+            fout.write("exac_freqfile=resources/allelefreqs/ExAC/ExAC_exome_SNV_freq.txt\n")
+            fout.write("hgvd_freqfile=resources/allelefreqs/HGVD/HGVD_freq.txt\n")
+            fout.write("esp6500_freqfile=resources/allelefreqs/ESP6500/ESP6500_freq.txt\n")
+            fout.write("gonl_freqfile=resources/allelefreqs/GoNL/gonl_freq.txt\n")
+            fout.write("clinvar_freq=resources/allelefreqs/clinvar/clinvar.vcf\n")
+            fout.write("mutationtaster=resources/allelefreqs/mutationtaster/mutationtaster.list\n")
         fout.write("##################\n")
         fout.write("# Generic reference files\n")
         fout.write("##################\n")
-        fout.write("ref_dir={}/resources/hg38bundle\n".format(args.name[1:]))
-        fout.write(
-            "ref_genome={}/resources/hg38bundle/Homo_sapiens_assembly38.fasta\n".format(args.name[1:])
-        )
-        fout.write(
-            "indel_1={}/resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n".format(args.name[1:])
-        )
-        #fout.write(
-        #    "indel_2={}/resources/hg38bundle/Homo_sapiens_assembly38.known_indels.vcf.gz\n".format(args.name[1:])
-        #)
-        fout.write("DBSNP={}/resources/hg38bundle/dbsnp_146.hg38.vcf.gz\n".format(args.name[1:]))
+        fout.write("ref_dir=resources/hg38bundle\n")
+        fout.write("ref_genome=resources/hg38bundle/Homo_sapiens_assembly38.fasta\n")
+        fout.write("indel_1=resources/hg38bundle/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz\n")
+        fout.write("DBSNP=resources/hg38bundle/dbsnp_146.hg38.vcf.gz\n")
         fout.write("##################\n")
         fout.write("# Parameter settings\n")
         fout.write("##################\n")
@@ -95,11 +79,10 @@ def make_cfg(args):
         fout.write("# SNPEff databases\n")
         fout.write("##################\n")
         fout.write("snpeff_dbver=GRCh38.86\n")
-        fout.write("DBNSFP={}/resources/snpeff_db/dbNSFPv3.5a.txt.gz\n".format(args.name[1:]))
-        fout.write(
-            "GWASCATALOG={}/resources/snpeff_db/gwas-catalog-associations.tsv\n".format(args.name[1:]))
-        fout.write("PHASTCONS={}/resources/snpeff_db/phastCons100way/hg38.100way.phastCons\n".format(args.name[1:]))
-        fout.write("CLINVAR={}/resources/snpeff_db/clinvar_20180729.vcf.gz\n".format(args.name[1:]))
+        fout.write("DBNSFP=resources/snpeff_db/dbNSFPv3.5a.txt.gz\n")
+        fout.write("GWASCATALOG=resources/snpeff_db/gwas-catalog-associations.tsv\n")
+        fout.write("PHASTCONS=resources/snpeff_db/phastCons100way/hg38.100way.phastCons\n")
+        fout.write("CLINVAR=resources/snpeff_db/clinvar_20180729.vcf.gz\n")
         fout.write("##################\n")
         fout.write("# Docker images\n")
         fout.write("##################\n")
@@ -125,6 +108,7 @@ def process_fastq(args):
     count_bed = 0
     args.regions38 = 'NA'
     for filename in file_list:
+        # names of fastq files are expected to match "*.[12].fastq.gz"
         lf = filename.rsplit('.',3)
         if lf[-1] == 'bed':
             count_bed += 1
@@ -137,7 +121,7 @@ def process_fastq(args):
         for filename in file_list:
             lf = filename.rsplit('.', 3)
             if lf[-1] == 'bed' and count_bed == 1:
-                sys.stdout.write('Found one bed file {}, will use for region file.\n'.format(filename))
+                sys.stdout.write('Found target regions bed file: {}.\n'.format(filename))
                 args.regions38 = filename
                 continue
             elif len(lf) < 4 or lf[1] not in ['0', '1', '2'] or lf[2] not in ['fastq'] or lf[3] not in ['gz']:

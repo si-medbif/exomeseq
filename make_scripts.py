@@ -269,7 +269,7 @@ def make_deduplicate(args, db):
         fout.write("INPUT=/data/{}/BAM/{}_sorted.bam ".format(args.name, args.name))
         fout.write("OUTPUT=/data/{}/BAM/{}_deduplicated.bam ".format(args.name, args.name))
         fout.write("METRICS_FILE=/data/{}/BAM/{}_deduplication_metrics.txt ".format(args.name, args.name))
-        fout.write("CREATE_INDEX=TRUE\n")
+        fout.write("CREATE_INDEX=TRUE ")
         fout.write("TMP_DIR=/tmp\n")
 
 
@@ -305,7 +305,7 @@ def make_realign(args, db):
         fout.write("##Step5-1: Create aligner target\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T RealignerTargetCreator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
@@ -341,7 +341,7 @@ def make_realign(args, db):
         fout.write("##Step5-2: Realign indels\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T IndelRealigner ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -380,7 +380,7 @@ def make_BQSR(args, db):
         fout.write("##Step6-1: Perform Base Recalibration\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T BaseRecalibrator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
@@ -410,7 +410,7 @@ def make_BQSR(args, db):
         fout.write("##Step6-4: Print Reads\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T PrintReads ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -436,7 +436,7 @@ def make_call_haplotype(args, db):
         fout.write("##Step7: Call Haplotype\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T HaplotypeCaller ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -465,7 +465,7 @@ def make_genotype(args, db):
         fout.write("##Step8: Genotype\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T GenotypeGVCFs ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -478,7 +478,7 @@ def make_genotype(args, db):
             "-log /data/{}/LOG/8_{}_genotype_gvcf.log".format(args.name, args.name))
         fout.write("\n\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T VariantAnnotator ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -512,7 +512,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-1-1: Extract SNPs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T SelectVariants ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -528,7 +528,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-1-2: Filter SNPs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T VariantFiltration ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -546,7 +546,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-2-1: Extract INDELs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T SelectVariants ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
@@ -565,7 +565,7 @@ def make_SNV_QC(args, db):
         fout.write("##Step9-2-2: Filter INDELs\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T VariantFiltration ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))

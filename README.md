@@ -2,10 +2,22 @@
 Analysing sequence data from whole exome sequencing or targeted gene panel sequencing.
 
 ## Requirements
-    * Ubuntu, or any other compatible OS
-    * Python 3
+
+### Installed software
+    * Ubuntu, or other compatible OS (tested with ubuntu 16.04)
+    * Python 3 (should be installed by default)
     * Docker
     * Git
+    * Unzip
+    * Bgzip / tabix
+    These can be installed by running the following commands:
+    $ apt update
+    $ apt install git unzip tabix
+    
+### Hardware requirements
+    * Storage: 256 GB
+    * Memory (RAM): 8 GB
+    * Processors (cores): 4
     
 ## Setup
 
@@ -18,6 +30,7 @@ The package consists of python scripts that will
 
 ## Instructions:
 
+    0. It is recommended to use a service like 'screen' or 'tmux' to detach the process. The terminal can then be closed without interrupting the program.
 	1. Create a new project folder and move to this location
 	$ mkdir projectA
 	$ cd projectA

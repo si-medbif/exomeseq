@@ -12,7 +12,7 @@ Analysing sequence data from whole exome sequencing or targeted gene panel seque
     * Bgzip / tabix
     These can be installed by running the following commands:
     $ apt update
-    $ apt install git unzip tabix
+    $ apt install git unzip tabix docker.io python-minimal
     
 ### Hardware requirements
     * Storage: 256 GB
@@ -39,25 +39,30 @@ The package consists of python scripts that will
     $ cp <fastq_file1/2> <sample_name>.1.fastq.gz
     $ cp <fastq_file2/2> <sample_name>.2.fastq.gz
     
-    3. Download the pipeline code from GitHub:
+    3. Copy the bed file containing the target regions into the current folder.
+    $ cp <target_regions>.bed .
+    
+    4. Download the pipeline code from GitHub:
     $ git clone https://github.com/si-medbif/exomeseq.git
 
 #### The user can at this step choose one of two paths:
     
 ##### Fully automatic, no trimming of reads 
       
-	4. Start the command to setup and run the pipeline 
+	5. Start the command to setup and run the pipeline 
 	$ exomeseq/runme.sh
 	
 ##### Half-automatic, user decides to trim reads or not
 
-	4. Start the command to setup the pipeline 
+	5. Start the command to setup the pipeline 
 	$ exomeseq/runsetup.sh
 	
-	5a. Run the pipeline without trimming reads  
+	6. Check the FastQC output (in "sample/FastQC_pre/") and then do either 6a or 6b:
+	
+	6a. Run the pipeline without trimming reads  
     $ exomeseq/run_analysis.sh
     
-    5b. Run the pipeline after trimming reads
+    6b. Run the pipeline after trimming reads
     $ exomeseq/run_qc_analysis.sh
 	 
 The combined report will be in the current folder when finished.

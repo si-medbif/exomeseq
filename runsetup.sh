@@ -61,7 +61,7 @@ docker pull biocontainers/bwa
 docker pull broadinstitute/picard
 docker pull broadinstitute/gatk3:3.8-1
 docker pull fjukstad/trimmomatic
-docker build --rm -t "snpeff38:v1" snpeff4.3/.
+docker build --rm -t "snpeff38:v1" exomeseq/snpeff4.3/.
 #####################################
 # SETUP Part4:
 # Create runscripts for each sample

@@ -44,9 +44,9 @@ tar xzvf exome_pipeline_resources.tar.gz
 #bgzip dbNSFPv3.5a.txt
 #tabix -s 1 -b 2 -e 2 dbNSFPv3.5a.txt.gz
 ## PhastCons
-#wget --recursive --no-parent -l2 http://hgdownload-test.cse.ucsc.edu/goldenPath/hg38/phastCons100way/
-#mv hgdownload-test.cse.ucsc.edu/goldenPath/hg38/phastCons100way/ phastCons100way
-#rm -rf hgdownload-test.cse.ucsc.edu/
+#wget --recursive --no-parent -l2 http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons100way/
+#mv hgdownload.cse.ucsc.edu/goldenPath/hg38/phastCons100way/ phastCons100way
+#rm -rf hgdownload.cse.ucsc.edu/
 ## ClinVar
 #wget ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar_20180729.vcf.gz*
 ## GWASCat

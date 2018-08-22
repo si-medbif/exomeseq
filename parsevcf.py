@@ -292,7 +292,7 @@ def read_config(args, db):
 
 def read_regions(ars, db):
     db["regions"] = {}
-    region_file = "/" + db["exon_bed"]
+    region_file = "/{}/{}".format(db["out_dir"], db["exon_bed"])
     with open(region_file, "r") as fin:
         for reg_line in fin:
             try:

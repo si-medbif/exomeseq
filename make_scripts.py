@@ -469,7 +469,7 @@ def make_genotype(args, db):
         )
         fout.write("-T GenotypeGVCFs ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))
-        fout.write("--variant /data/{}/GVCF/{}_GATK.g.vcf ".format(db["out_dir"], args.name, args.name))
+        fout.write("--variant /data/{}/GVCF/{}_GATK.g.vcf ".format(args.name, args.name))
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
         fout.write("-nt 1 ")
         fout.write("-o /data/{}/VCF/{}_RAW.vcf ".format(args.name, args.name)

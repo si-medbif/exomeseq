@@ -12,7 +12,7 @@ Analysing sequence data from whole exome sequencing or targeted gene panel seque
     * Bgzip / tabix
     These can be installed by running the following commands:
     $ apt update
-    $ apt install git unzip tabix docker.io python-minimal
+    $ apt install git unzip tabix docker.io python-all
     
 ### Hardware requirements
     * Storage: 256 GB

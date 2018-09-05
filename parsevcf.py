@@ -653,7 +653,7 @@ def main(args):
     try:
         t = time.time()
         read_samples(args, db)
-        print("Read {} samples: {:.3f}s".format(len(args.samples), time.time() - t))
+        print("Read {} samples: {:.3f}s".format(len(db["samples"]), time.time() - t))
     except FileNotFoundError:
         db["samples"] = []
     t = time.time()
@@ -677,7 +677,9 @@ def main(args):
         read_vcfheader(args, db)
         print("VCFheaders: {:.3f}s".format(time.time() - t))
     except FileNotFoundError:
-        db[]
+        db["header_d"] = {}
+        db["header_l"] = []
+        db["ANN_header_l"] = []
     try:
         t = time.time()
         do_setup(args, db)

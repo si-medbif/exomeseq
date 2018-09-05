@@ -43,7 +43,10 @@ def read_samples(args, db):
             for line in fin:
                 if line.startswith("#"):
                     continue
-                db["samples"].append(line.strip())
+                newsample = line.strip()
+                if len(newsample) == 0:
+                    continue
+                db["samples"].append(newsample)
 
 
 def read_variants(args, db):
@@ -74,7 +77,7 @@ def read_vcfheader(args, db):
     db["header_d"] = {}
     db["header_l"] = []
     db["ANN_header_l"] = []
-    vcf_header_file = "exomeseq/vcf_header.txt"  # TODO: think about how to handle this file
+    vcf_header_file = "exomeseq/vcf_header.txt"
     with open(vcf_header_file, "r") as fin:
         for line in fin:
             try:
@@ -291,7 +294,6 @@ def read_config(args, db):
 
 
 def read_regions(ars, db):
-    db["regions"] = {}
     region_file = "/{}/{}".format(db["out_dir"], db["exon_bed"])
     with open(region_file, "r") as fin:
         for reg_line in fin:
@@ -538,7 +540,7 @@ def parse_vcf(args, db, sample, mode):
                         not in ANN_info_d["ANN_Feature_ID"]
                     ):
                         continue
-                # A colon in transcript name is ? TODO Find an explanation for this
+                # A colon in transcript name is ?
                 if ":" in ANN_info_d["ANN_Feature_ID"]:
                     continue
                 # If information is not known about hg19, estimate it
@@ -664,15 +666,25 @@ def main(args):
     except FileNotFoundError:
         sys.stderr.write("Missing configuration file: {}\n".format(args.config))
         return
-    t = time.time()
-    read_regions(args, db)
-    print("Read regions file: {:.3f}s".format(time.time() - t))
-    t = time.time()
-    read_vcfheader(args, db)
-    print("VCFheaders: {:.3f}s".format(time.time() - t))
-    t = time.time()
-    do_setup(args, db)
-    print("Setup: {:.3f}s".format(time.time() - t))
+    try:
+        t = time.time()
+        read_regions(args, db)
+        print("Read regions file: {:.3f}s".format(time.time() - t))
+    except FileNotFoundError:
+        db["regions"] = {}
+    try:
+        t = time.time()
+        read_vcfheader(args, db)
+        print("VCFheaders: {:.3f}s".format(time.time() - t))
+    except FileNotFoundError:
+        db[]
+    try:
+        t = time.time()
+        do_setup(args, db)
+        print("Setup: {:.3f}s".format(time.time() - t))
+    except:
+        sys.stderr.write("Error performing setup\n")
+        return
     db["dbsnp"] = {}
     db['dbmutationtaster'] = {}
     db['dbclinvar'] = {}

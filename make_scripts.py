@@ -248,7 +248,7 @@ def make_sort(args, db):
         fout.write("INPUT=/data/{}/SAM/{}_aligned.sam ".format(args.name, args.name))
         fout.write("OUTPUT=/data/{}/BAM/{}_sorted.bam ".format(args.name, args.name))
         fout.write("SORT_ORDER=coordinate ")
-        fout.write("TMP_DIR=/tmp\n")
+        fout.write("TMP_DIR=/data/{}/tmp\n".format(args.name))
 
 
 def make_deduplicate(args, db):
@@ -380,7 +380,8 @@ def make_BQSR(args, db):
         fout.write("##Step6-1: Perform Base Recalibration\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(
+                db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T BaseRecalibrator ")
         fout.write("--disable_auto_index_creation_and_locking_when_reading_rods ")
@@ -400,7 +401,8 @@ def make_BQSR(args, db):
         fout.write("{} ".format(db["bed_argument"]))
         fout.write("--interval_padding 100 ")
         fout.write("-I /data/{}/BAM/{}_realigned.bam ".format(args.name, args.name))
-        fout.write("-nct {} ".format(db["gatk_num_cpu_threads"]))
+        # This line seems to increase memory consumption
+        #fout.write("-nct {} ".format(db["gatk_num_cpu_threads"]))
         fout.write("-o /data/{}/BQSR/{}_perform_bqsr.table ".format(args.name, args.name))
         fout.write("-log /data/{}/LOG/6-1_{}_perform_bqsr.log ".format(args.name, args.name))
         # This line is needed when the FASTQ file contains the 'other' quality score format: Q64/phred64
@@ -410,7 +412,8 @@ def make_BQSR(args, db):
         fout.write("##Step6-4: Print Reads\n")
         fout.write("##-------------\n")
         fout.write(
-            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(db["out_dir"], db["GATK"], db["java_mem"])
+            "docker run --rm -v /{}:/data {} java -Xmx{} -jar GenomeAnalysisTK.jar ".format(
+                db["out_dir"], db["GATK"], db["java_mem"])
         )
         fout.write("-T PrintReads ")
         fout.write("-R /data/{} ".format(db["ref_genome"]))

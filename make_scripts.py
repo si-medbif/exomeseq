@@ -190,16 +190,16 @@ def make_trimfastq(args, db):
         fout.write("SLIDINGWINDOW:{}:{} ".format(db["TRIM_window"], db["TRIM_score"]))
         fout.write("MINLEN:{}\n".format(db["TRIM_minlen"]))
         if not args.single:
-            fout.write("mv /{}/{}.1.fastq.gz /{}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}.2.fastq.gz /{}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}_paired.1.fastq.gz /{}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
-            fout.write("mv /{}/{}_paired.2.fastq.gz /{}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
+            fout.write("mv {}/{}.1.fastq.gz {}/{}.RAW.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv {}/{}.2.fastq.gz {}/{}.RAW.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv {}/{}_paired.1.fastq.gz {}/{}.1.fastq.gz\n".format(db["fastq_paired_dir"], args.name, db["fastq_paired_dir"], args.name))
+            fout.write("mv {}/{}_paired.2.fastq.gz {}/{}.2.fastq.gz\n".format(db["fastq_paired_dir"], args.name,
                                                                                             db["fastq_paired_dir"],
                                                                                             args.name)
                        )
         else:
-            fout.write("mv /{}/{}.0.fastq.gz /{}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
-            fout.write("mv /{}/{}_single.0.fastq.gz /{}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
+            fout.write("mv {}/{}.0.fastq.gz {}/{}.RAW.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
+            fout.write("mv {}/{}_single.0.fastq.gz {}/{}.0.fastq.gz\n".format(db["fastq_single_dir"], args.name, db["fastq_single_dir"], args.name))
 
 def make_align(args, db):
     """ Creates the script for aligning reads """

@@ -33,7 +33,7 @@ def do_setup(args):
         os.mkdir("{}/resources/snpeff_db".format(args.name))
         os.chmod("{}/resources/snpeff_db".format(args.name), 0o777)
     except FileExistsError:
-        sys.stderr.write("ERROR! Project folder already exists...\n")
+        sys.stderr.write("WARNING! Project folder already exists...\n")
         # While testing, just keep this as a warning.
         #sys.exit(1)
 

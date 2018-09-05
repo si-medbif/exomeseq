@@ -759,6 +759,7 @@ if __name__ == "__main__":
         "-o",
         "--outfile",
         action="store",
+        default="full_report.txt",
         help="Name of full output",
     )
     parser.add_argument(

@@ -68,7 +68,7 @@ docker build --rm -t "snpeff38:v1" exomeseq/snpeff4.3/.
 # SETUP Part4:
 # Create runscripts for each sample
 #####################################
-for SAMPLE in `cat samples.paired.list`;
+for SAMPLE in `cat samples.paired.list samples.single.list`;
 do
     exomeseq/make_scripts.py ${SAMPLE}
     sh ${SAMPLE}/Scripts/0_${SAMPLE}_fastqc.sh

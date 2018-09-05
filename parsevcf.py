@@ -295,11 +295,16 @@ def read_config(args, db):
 
 def read_regions(ars, db):
     region_file = "/{}/{}".format(db["out_dir"], db["exon_bed"])
+    db["regions"] = {}
     with open(region_file, "r") as fin:
         for reg_line in fin:
-            try:
-                chrom, start, end, name = reg_line.strip().split()
-            except ValueError:
+            l = reg_line.strip().split()
+            if len(l) == 4:
+                chrom, start, end, name = l
+            elif len(l) == 3:
+                chrom, start, end = l
+                name = "NA"
+            else:
                 continue
             chrom = chrom.strip("chr")
             if chrom not in db["regions"]:

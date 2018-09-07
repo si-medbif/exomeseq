@@ -69,15 +69,15 @@ The combined report will be in the current folder when finished.
 
     $ ls -l full_report.txt
     
-$ sudo mkfs.ext4 -F /dev/vdb
-$ sudo mkdir -p /mnt/exome
-$ sudo mount -o discard,defaults,noatime /dev/vdb /mnt/exome
-$ echo '/dev/vdb /mnt/exome ext4 defaults,nofail,discard 0 0' | sudo tee -a /etc/fstab
-$ sudo chown -R ubuntu:ubuntu /mnt/exome
-$ sudo apt update
-$ sudo apt install git unzip tabix docker.io python-all
-$ sudo usermod -a -G docker $USER
-$ sudo reboot
-# At this point you will automatically be logged out from the server
-# Just log in again as before and continue with the next command
-$ cd /mnt/exome
+    $ sudo mkfs.ext4 -F /dev/vdb
+    $ sudo mkdir -p /mnt/exome
+    $ sudo mount -o discard,defaults,noatime /dev/vdb /mnt/exome
+    $ echo '/dev/vdb /mnt/exome ext4 defaults,nofail,discard 0 0' | sudo tee -a /etc/fstab
+    $ sudo chown -R ubuntu:ubuntu /mnt/exome
+    $ sudo apt update
+    $ sudo apt install git unzip tabix docker.io python-all
+    $ sudo usermod -a -G docker $USER
+    $ sudo reboot
+    # At this point you will automatically be logged out from the server
+    # Just log in again as before and continue with the next command
+    $ cd /mnt/exome

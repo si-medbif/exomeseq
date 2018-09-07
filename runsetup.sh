@@ -25,7 +25,9 @@ exomeseq/setup.py
 #############################################################
 
 # NB! This link is temporary and is not guaranteed to work outside of the time for the workshop, Sept 10-11.
-wget https://si-medbif-exomeseq.sgp1.digitaloceanspaces.com/exome_pipeline_resources.tar.gz
+#wget https://si-medbif-exomeseq.sgp1.digitaloceanspaces.com/exome_pipeline_resources.tar.gz
+# New link should work until Sep 2019
+wget https://sibdm-exome.sgp1.digitaloceanspaces.com/exome_pipeline_resources.tar.gz
 tar xzvf exome_pipeline_resources.tar.gz
 rm exome_pipeline_resources.tar.gz
 

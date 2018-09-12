@@ -74,7 +74,7 @@ def make_cfg(args):
         fout.write("cores=4\n")
         fout.write("gatk_num_threads=1\n")
         fout.write("gatk_num_cpu_threads=4\n")
-        fout.write("java_mem=8G\n")
+        fout.write("java_mem=7G\n")
         fout.write("##################\n")
         fout.write("# SNPEff databases\n")
         fout.write("##################\n")

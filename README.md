@@ -21,7 +21,7 @@ Analysing sequence data from whole exome sequencing or targeted gene panel seque
     
 ## Setup
 
-The package consists of python scripts that will
+The package consists of several python scripts that will
 
 	1. Create all required folders and configuration files.
 	2. Move any provided FASTQ files to their appropriate location.
